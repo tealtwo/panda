@@ -40,6 +40,7 @@ static void escc_rx_hook(const CANPacket_t* to_push) {
         escc.acc_obj_dist_2 = (GET_BYTE(to_push, 5) & 0xFU);
         escc.acc_obj_rel_spd_1 = ((GET_BYTE(to_push, 5) >> 4) & 0xFU);
         escc.acc_obj_rel_spd_2 = GET_BYTE(to_push, 6);
+        send_escc_msg(&escc, CAR_BUS);
         break;
 
       case 0x421: // SCC12: Detect AEB, override and forward is_scc_msg
@@ -47,6 +48,7 @@ static void escc_rx_hook(const CANPacket_t* to_push) {
         escc.cf_vsm_warn_scc12 = GET_BYTE(to_push, 0) >> 4 & 0x3U;
         escc.cf_vsm_deccmdact_scc12 = GET_BYTE(to_push, 0) >> 1 & 1U;
         escc.cr_vsm_deccmd_scc12 = GET_BYTE(to_push, 2);
+        send_escc_msg(&escc, CAR_BUS);
         break;
 
       case 0x38D: // FCA11: Detect AEB, override and forward is_scc_msg
@@ -54,15 +56,12 @@ static void escc_rx_hook(const CANPacket_t* to_push) {
         escc.cf_vsm_warn_fca11 = GET_BYTE(to_push, 0) >> 3 & 0x3U;
         escc.cf_vsm_deccmdact_fca11 = GET_BYTE(to_push, 3) >> 7 & 1U;
         escc.cr_vsm_deccmd_fca11 = GET_BYTE(to_push, 1);
+        send_escc_msg(&escc, CAR_BUS);
         break;
 
       default: ;
     }
   }
-
-  // On any message that the radar sends, we inject our ESCC, this is to piggyback on their frequencies rather than having to calculate our own wasting some compute.
-  if (bus == RADAR_BUS)
-    send_escc_msg(&escc, CAR_BUS);
 }
 
 static bool escc_tx_hook(const CANPacket_t* to_send) {
