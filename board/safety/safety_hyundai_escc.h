@@ -1,13 +1,5 @@
 #pragma once
 
-// Code below is only so that the IDE can display the code correctly, becuase it's not understanding the preprocessor directives.
-#ifndef PANDA
-#include "../can_definitions.h"
-#include "../safety_declarations.h"
-#include "../safety.h"
-#include "../fake_stm.h"
-#endif
-
 #define DEVNULL_BUS (-1)
 #define CAR_BUS 0
 #define RADAR_BUS 2
