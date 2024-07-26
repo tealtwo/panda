@@ -117,21 +117,19 @@ void set_safety_mode(uint16_t mode, uint16_t param) {
   can_init_all();
 }
 
-bool _is_car_safety_mode(uint16_t mode) {
+bool is_car_safety_mode(uint16_t mode) {
   return (mode != SAFETY_SILENT) &&
          (mode != SAFETY_NOOUTPUT) &&
          (mode != SAFETY_ALLOUTPUT) &&
          (mode != SAFETY_ELM327);
 }
 
-#ifndef ESCC  // If not ESCC
-bool is_car_safety_mode(uint16_t mode) { return _is_car_safety_mode(mode); }
-#else // otherwise, we need to include the ESCC mode and extend
-bool is_car_safety_mode(uint16_t mode) {
-  return _is_car_safety_mode(mode) && (mode != SAFETY_HYUNDAI_ESCC);
-}
-
+#ifdef ESCC
 // ***************************** ESCC code *****************************
+bool is_car_safety_mode_escc(uint16_t mode) {
+  return is_car_safety_mode(mode) && (mode != SAFETY_HYUNDAI_ESCC);
+}
+#define is_car_safety_mode is_car_safety_mode_escc
 
 #define CAN_ESCC_INPUT  0x2AC
 #define CAN_ESCC_OUTPUT 0x2ABU
@@ -259,15 +257,11 @@ void tick_handler(void) {
       if (heartbeat_counter < UINT32_MAX) {
         heartbeat_counter += 1U;
       }
-#ifdef ESCC
-      // Hearbet disabled when ESCC
-      heartbeat_disabled = true;
-#else
+
       // disabling heartbeat not allowed while in safety mode
       if (is_car_safety_mode(current_safety_mode)) {
         heartbeat_disabled = false;
       }
-#endif
 
       if (siren_countdown > 0U) {
         siren_countdown -= 1U;
@@ -293,6 +287,7 @@ void tick_handler(void) {
         heartbeat_engaged_mismatches = 0U;
       }
 
+#ifndef ESCC // Hearbet disabled when ESCC
       if (!heartbeat_disabled) {
         // if the heartbeat has been gone for a while, go to SILENT safety mode and enter power save
         if (heartbeat_counter >= (check_started() ? HEARTBEAT_IGNITION_CNT_ON : HEARTBEAT_IGNITION_CNT_OFF)) {
@@ -331,6 +326,7 @@ void tick_handler(void) {
           fan_set_power(enabled ? 50U : 0U);
         }
       }
+#endif
 
       // check registers
       check_registers();
@@ -393,7 +389,7 @@ int main(void) {
   microsecond_timer_init();
 
 #ifdef ESCC
-  // init to SAFETY_ALLOUTPUT and can all output
+  // init to SAFETY_HYUNDAI_ESCC and can all output
   set_safety_mode(SAFETY_HYUNDAI_ESCC, 1U);
 #else
   // init to SILENT and can silent
