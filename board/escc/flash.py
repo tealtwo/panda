@@ -8,7 +8,7 @@ board_path = os.path.dirname(os.path.realpath(__file__))
 
 if __name__ == "__main__":
   print(board_path)
-  subprocess.check_call(f"scons -C {board_path}/../.. -j$(nproc) {board_path}", shell=True)
+  subprocess.check_call(f"scons -C {board_path}/../.. -j$(nproc) {board_path} --escc", shell=True)
 
   serials = Panda.list()
   print(f"found {len(serials)} panda(s) - {serials}")
