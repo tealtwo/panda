@@ -232,8 +232,13 @@ static int volkswagen_pq_fwd_hook(int bus_num, int addr) {
 
   switch (bus_num) {
     case 0:
-      // Forward all traffic from the Extended CAN onward
-      bus_fwd = 2;
+      if (volkswagen_longitudinal && addr == MSG_MOTOR_2) {
+        // block Motor_2 to radar, OP will send manually
+        bus_fwd = -1;
+      } else {
+        // Forward all traffic from the Extended CAN onward
+        bus_fwd = 2;
+      }
       break;
     case 2:
       if ((addr == MSG_HCA_1) || (addr == MSG_LDW_1)) {
