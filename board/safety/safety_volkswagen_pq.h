@@ -35,7 +35,8 @@ const LongitudinalLimits VOLKSWAGEN_PQ_LONG_LIMITS = {
 const CanMsg VOLKSWAGEN_PQ_STOCK_TX_MSGS[] = {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8},
                                               {MSG_GRA_NEU, 0, 4}, {MSG_GRA_NEU, 2, 4}};
 const CanMsg VOLKSWAGEN_PQ_LONG_TX_MSGS[] =  {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8},
-                                              {MSG_ACC_SYSTEM, 0, 8}, {MSG_ACC_GRA_ANZEIGE, 0, 8}};
+                                              {MSG_ACC_SYSTEM, 0, 8}, {MSG_ACC_GRA_ANZEIGE, 0, 8},
+                                              {MSG_MOTOR_2, 2, 8}};
 
 RxCheck volkswagen_pq_rx_checks[] = {
   {.msg = {{MSG_LENKHILFE_3, 0, 6, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
