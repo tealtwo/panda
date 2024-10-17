@@ -232,8 +232,8 @@ static int volkswagen_pq_fwd_hook(int bus_num, int addr) {
 
   switch (bus_num) {
     case 0:
-      if (volkswagen_longitudinal && addr == MSG_MOTOR_2) {
-        // block Motor_2 to radar, OP will send manually
+      if (volkswagen_longitudinal && (addr == MSG_MOTOR_2 || addr == MSG_GRA_NEU)) {
+        // openpilot takes over signals OEM-radar listens to
         bus_fwd = -1;
       } else {
         // Forward all traffic from the Extended CAN onward
