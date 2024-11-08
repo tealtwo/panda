@@ -16,7 +16,7 @@ const SteeringLimits VOLKSWAGEN_MQB_STEERING_LIMITS = {
 // acceleration in m/s2 * 1000 to avoid floating point math
 const LongitudinalLimits VOLKSWAGEN_MQB_LONG_LIMITS = {
   .max_accel = 2000,
-  .min_accel = -3500,
+  .min_accel = -5000,
   .inactive_accel = 3010,  // VW sends one increment above the max range when inactive
 };
 
