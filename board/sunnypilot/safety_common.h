@@ -40,7 +40,9 @@ void mads_resume_controls(void) {
 void check_braking_condition(bool state, bool state_prev) {
   if (state && (!state_prev || vehicle_moving)) {
     controls_allowed = false;
-    disengage_lateral_on_brake ? mads_exit_controls() : mads_set_state(false);
+    if (disengage_lateral_on_brake) {
+      mads_exit_controls();
+    }
   } else if (!state && disengage_lateral_on_brake) {
     mads_resume_controls();
   } else {

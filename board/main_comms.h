@@ -248,7 +248,7 @@ int comms_control_handler(ControlPacket_t *req, uint8_t *resp) {
       if (!is_car_safety_mode(current_safety_mode)) {
         alternative_experience = req->param1;
         enable_mads = (alternative_experience & ALT_EXP_ENABLE_MADS) != 0;
-        disengage_lateral_on_brake = !(alternative_experience & ALT_EXP_DISABLE_DISENGAGE_LATERAL_ON_BRAKE);
+        disengage_lateral_on_brake = enable_mads && !(alternative_experience & ALT_EXP_DISABLE_DISENGAGE_LATERAL_ON_BRAKE);
       }
       break;
     // **** 0xe0: uart read
