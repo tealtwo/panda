@@ -210,7 +210,7 @@ extern bool safety_rx_checks_invalid;
 // mads
 void mads_set_state(bool state);
 void mads_check_acc_main(void);
-void mads_check_alt_button(void);
+void mads_check_lkas_button(void);
 void mads_exit_controls(void);
 void mads_resume_controls(void);
 void check_braking_condition(bool state, bool state_prev);
@@ -219,8 +219,8 @@ extern bool enable_mads;
 extern bool disengage_lateral_on_brake;
 extern bool disengaged_from_brakes;
 extern bool controls_allowed_lat;
-extern bool alt_button_pressed;
-extern bool alt_button_pressed_prev;
+extern bool lkas_button_pressed;
+extern bool lkas_button_pressed_prev;
 
 // for safety modes with torque steering control
 extern int desired_torque_last;       // last desired steer torque

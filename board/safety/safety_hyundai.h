@@ -171,8 +171,8 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
     }
 
     if ((addr == 0x391) && hyundai_lfa_button && enable_mads) {
-      alt_button_pressed = GET_BIT(to_push, 4U);
-      mads_check_alt_button();
+      lkas_button_pressed = GET_BIT(to_push, 4U);
+      mads_check_lkas_button();
     }
 
     bool stock_ecu_detected = (addr == 0x340);

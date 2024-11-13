@@ -16,11 +16,11 @@ void mads_check_acc_main(void) {
   }
 }
 
-void mads_check_alt_button(void) {
-  if (alt_button_pressed && !alt_button_pressed_prev) {
+void mads_check_lkas_button(void) {
+  if (lkas_button_pressed && !lkas_button_pressed_prev) {
     controls_allowed_lat = true;
   }
-  alt_button_pressed_prev = alt_button_pressed;
+  lkas_button_pressed_prev = lkas_button_pressed;
 }
 
 void mads_exit_controls(void) {
