@@ -347,7 +347,7 @@ int comms_control_handler(ControlPacket_t *req, uint8_t *resp) {
         heartbeat_counter = 0U;
         heartbeat_lost = false;
         heartbeat_disabled = false;
-        heartbeat_engaged = req->param1 == 1U;
+        heartbeat_engaged = (req->param1 == 1U);
         break;
       }
     // **** 0xf6: set siren enabled
