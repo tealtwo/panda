@@ -90,6 +90,7 @@ bool disengaged_from_brakes = false;
 bool controls_allowed_lat = false;
 bool lkas_button_pressed = false;
 bool lkas_button_pressed_prev = false;
+bool acc_main_on_prev = false;
 
 // for safety modes with torque steering control
 int desired_torque_last = 0;       // last desired steer torque

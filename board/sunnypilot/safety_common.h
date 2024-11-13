@@ -1,4 +1,5 @@
 #pragma once
+#include <safety.h>
 
 void mads_set_state(bool state) {
   controls_allowed_lat = state;
@@ -6,14 +7,15 @@ void mads_set_state(bool state) {
 }
 
 void mads_check_acc_main(void) {
-  if (enable_mads) {
-    controls_allowed_lat = acc_main_on;
+  if (acc_main_on && enable_mads) {
+    controls_allowed_lat = true;
   }
 
-  if (!acc_main_on) {
+  if (!acc_main_on && acc_main_on_prev) {
     controls_allowed = false;
     mads_set_state(false);
   }
+  acc_main_on_prev = acc_main_on;
 }
 
 void mads_check_lkas_button(void) {

@@ -221,6 +221,7 @@ extern bool disengaged_from_brakes;
 extern bool controls_allowed_lat;
 extern bool lkas_button_pressed;
 extern bool lkas_button_pressed_prev;
+extern bool acc_main_on_prev;
 
 // for safety modes with torque steering control
 extern int desired_torque_last;       // last desired steer torque
