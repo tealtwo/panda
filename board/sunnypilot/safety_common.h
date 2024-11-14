@@ -19,7 +19,7 @@ void mads_check_acc_main(void) {
 }
 
 void mads_check_lkas_button(void) {
-  if (lkas_button && !lkas_button_prev) {
+  if (lkas_button && !lkas_button_prev && enable_mads) {
     controls_allowed_lat = true;
   }
   lkas_button_prev = lkas_button;
