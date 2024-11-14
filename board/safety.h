@@ -88,8 +88,8 @@ bool enable_mads = false;
 bool disengage_lateral_on_brake = false;
 bool disengaged_from_brakes = false;
 bool controls_allowed_lat = false;
-bool lkas_button_pressed = false;
-bool lkas_button_pressed_prev = false;
+bool lkas_button = false;
+bool lkas_button_prev = false;
 bool acc_main_on_prev = false;
 
 // for safety modes with torque steering control

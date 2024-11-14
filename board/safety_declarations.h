@@ -219,8 +219,8 @@ extern bool enable_mads;
 extern bool disengage_lateral_on_brake;
 extern bool disengaged_from_brakes;
 extern bool controls_allowed_lat;
-extern bool lkas_button_pressed;
-extern bool lkas_button_pressed_prev;
+extern bool lkas_button;
+extern bool lkas_button_prev;
 extern bool acc_main_on_prev;
 
 // for safety modes with torque steering control
