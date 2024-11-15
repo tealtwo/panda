@@ -107,6 +107,8 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
       int cruise_status = ((GET_BYTE(to_push, 8) >> 4) & 0x7U);
       bool cruise_engaged = (cruise_status == 1) || (cruise_status == 2);
       hyundai_common_cruise_state_check(cruise_engaged);
+
+      acc_main_on = GET_BIT(to_push, 66U);
     }
   }
 
@@ -120,6 +122,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
   }
   generic_rx_checks(stock_ecu_detected);
 
+  mads_check_acc_main();
 }
 
 static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
@@ -193,6 +196,12 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
 
     if (violation) {
       tx = false;
+    }
+
+    bool acc_main_on_tx = GET_BIT(to_send, 66U);
+    if (acc_main_on && !acc_main_on_tx) {
+      acc_main_on = acc_main_on_tx;
+      mads_check_acc_main();
     }
   }
 

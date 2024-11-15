@@ -131,7 +131,6 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
   if ((addr == 0x420) && (((bus == 0) && !hyundai_camera_scc) || ((bus == 2) && hyundai_camera_scc))) {
     if (!hyundai_longitudinal) {
       acc_main_on = GET_BIT(to_push, 0U);
-      mads_check_acc_main();
     }
   }
 
@@ -184,6 +183,8 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
     }
     generic_rx_checks(stock_ecu_detected);
   }
+
+  mads_check_acc_main();
 }
 
 static bool hyundai_tx_hook(const CANPacket_t *to_send) {
@@ -221,6 +222,12 @@ static bool hyundai_tx_hook(const CANPacket_t *to_send) {
 
     if (violation) {
       tx = false;
+    }
+
+    bool acc_main_on_tx = GET_BIT(to_send, 0U);
+    if (acc_main_on && !acc_main_on_tx) {
+      acc_main_on = acc_main_on_tx;
+      mads_check_acc_main();
     }
   }
 
