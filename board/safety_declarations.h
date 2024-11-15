@@ -223,6 +223,7 @@ extern bool lkas_button;
 extern bool lkas_button_prev;
 extern bool acc_main_on_prev;
 extern bool main_button_prev;
+extern uint32_t acc_main_on_mismatches;
 
 // for safety modes with torque steering control
 extern int desired_torque_last;       // last desired steer torque

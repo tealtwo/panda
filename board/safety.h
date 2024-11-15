@@ -92,6 +92,7 @@ bool lkas_button = false;
 bool lkas_button_prev = false;
 bool acc_main_on_prev = false;
 bool main_button_prev = false;
+uint32_t acc_main_on_mismatches = 0;
 
 // for safety modes with torque steering control
 int desired_torque_last = 0;       // last desired steer torque
