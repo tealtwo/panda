@@ -185,6 +185,10 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
   }
 
   mads_check_acc_main();
+
+  if (acc_main_on && !acc_main_on_prev) {
+    acc_main_on_mismatches = 0;
+  }
 }
 
 static bool hyundai_tx_hook(const CANPacket_t *to_send) {
@@ -205,6 +209,19 @@ static bool hyundai_tx_hook(const CANPacket_t *to_send) {
     }
   }
 
+  if (addr == 0x420) {
+    bool acc_main_on_tx = GET_BIT(to_send, 0U);
+    if (acc_main_on && !acc_main_on_tx) {
+      acc_main_on_mismatches += 1U;
+      if (acc_main_on_mismatches >= 25U) {
+        acc_main_on = acc_main_on_tx;
+        mads_check_acc_main();
+      }
+    } else {
+      acc_main_on_mismatches = 0U;
+    }
+  }
+
   // ACCEL: safety check
   if (addr == 0x421) {
     int desired_accel_raw = (((GET_BYTE(to_send, 4) & 0x7U) << 8) | GET_BYTE(to_send, 3)) - 1023U;
@@ -222,21 +239,6 @@ static bool hyundai_tx_hook(const CANPacket_t *to_send) {
 
     if (violation) {
       tx = false;
-    }
-
-    bool acc_main_on_tx = GET_BIT(to_send, 0U);
-    if (acc_main_on && !acc_main_on_tx) {
-      acc_main_on_mismatches += 1U;
-      if (acc_main_on_mismatches >= 25U) {
-        acc_main_on = acc_main_on_tx;
-        mads_check_acc_main();
-      }
-    } else {
-      acc_main_on_mismatches = 0U;
-    }
-
-    if (acc_main_on && !acc_main_on_prev) {
-      acc_main_on_mismatches = 0;
     }
   }
 
