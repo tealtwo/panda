@@ -171,13 +171,22 @@ static int chrysler_fwd_hook(int bus_num, int addr) {
 
   // forward to camera
   if (bus_num == 0) {
-    bus_fwd = 2;
+    if (addr == chrysler_addrs->ESP_8) {
+      bus_fwd = 2;
+    }
+    else {
+      bus_fwd = 0x21;
+    }
   }
 
   // forward all messages from camera except LKAS messages
   const bool is_lkas = ((addr == chrysler_addrs->LKAS_COMMAND) || (addr == chrysler_addrs->DAS_6));
   if ((bus_num == 2) && !is_lkas){
-    bus_fwd = 0;
+    bus_fwd = 0x10;
+  }
+
+  if (bus_num == 1) {
+    bus_fwd = 0x20;
   }
 
   return bus_fwd;
@@ -220,7 +229,7 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
   static RxCheck chrysler_rx_checks[] = {
-    {.msg = {{CHRYSLER_ADDRS.EPS_2, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_ADDRS.EPS_2, 1, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_ADDRS.ESP_1, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     //{.msg = {{ESP_8, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}}},
     {.msg = {{514, 0, 8, .check_checksum = false, .max_counter = 0U, .frequency = 100U}, { 0 }, { 0 }}},
@@ -231,7 +240,10 @@ static safety_config chrysler_init(uint16_t param) {
   static const CanMsg CHRYSLER_TX_MSGS[] = {
     {CHRYSLER_ADDRS.CRUISE_BUTTONS, 0, 3},
     {CHRYSLER_ADDRS.LKAS_COMMAND, 0, 6},
+    {CHRYSLER_ADDRS.LKAS_COMMAND, 1, 6},
     {CHRYSLER_ADDRS.DAS_6, 0, 8},
+    {CHRYSLER_ADDRS.DAS_6, 1, 8},
+    {CHRYSLER_ADDRS.ESP_8, 1, 8},
   };
 
   static const CanMsg CHRYSLER_RAM_DT_TX_MSGS[] = {
@@ -254,7 +266,7 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
   static RxCheck chrysler_ram_hd_rx_checks[] = {
-    {.msg = {{CHRYSLER_RAM_HD_ADDRS.EPS_2, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_HD_ADDRS.EPS_2, 1, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_RAM_HD_ADDRS.ESP_1, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_RAM_HD_ADDRS.ESP_8, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_RAM_HD_ADDRS.ECM_5, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
