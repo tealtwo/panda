@@ -427,6 +427,7 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 
   def test_realtime_limits(self):
     self.safety.set_controls_allowed(True)
+    self.safety.set_controls_allowed_lat(True)
 
     for sign in [-1, 1]:
       self.safety.init_tests()
