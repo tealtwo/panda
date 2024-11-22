@@ -185,6 +185,11 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
       mads_check_acc_main();
     }
 
+    if (addr == FORD_Steering_Data_FD1 && enable_mads) {
+      lkas_button = GET_BIT(to_push, 40);
+      mads_check_lkas_button();
+    }
+
     // If steering controls messages are received on the destination bus, it's an indication
     // that the relay might be malfunctioning.
     bool stock_ecu_detected = ford_lkas_msg_check(addr);
