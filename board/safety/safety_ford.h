@@ -181,7 +181,7 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
       bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
       pcm_cruise_check(cruise_engaged);
 
-      acc_main_on = (cruise_state == 3U) || (cruise_state == 4U) || (cruise_state == 5U);
+      acc_main_on = (cruise_state == 3U) || cruise_engaged;
       mads_check_acc_main();
     }
 
