@@ -218,6 +218,7 @@ class TorqueSteeringSafetyTestBase(PandaSafetyTestBase, abc.ABC):
     for enabled in [0, 1]:
       for t in range(int(-self.MAX_TORQUE * 1.5), int(self.MAX_TORQUE * 1.5)):
         self.safety.set_controls_allowed(enabled)
+        self.safety.set_controls_allowed_lat(enabled)
         self._set_prev_torque(t)
         if abs(t) > self.MAX_TORQUE or (not enabled and abs(t) > 0):
           self.assertFalse(self._tx(self._torque_cmd_msg(t)))
@@ -482,6 +483,7 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
     for controls_allowed in [True, False]:
       for torque in np.arange(-self.MAX_TORQUE - 1000, self.MAX_TORQUE + 1000, self.MAX_RATE_UP):
         self.safety.set_controls_allowed(controls_allowed)
+        self.safety.set_controls_allowed_lat(controls_allowed)
         self.safety.set_rt_torque_last(torque)
         self.safety.set_torque_meas(torque, torque)
         self.safety.set_desired_torque_last(torque - self.MAX_RATE_UP)
@@ -672,6 +674,7 @@ class AngleSteeringSafetyTest(PandaSafetyTestBase):
     # steer actuation bit is 0, regardless of controls allowed.
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)
+      self.safety.set_controls_allowed_lat(controls_allowed)
 
       for steer_control_enabled in (True, False):
         for angle_meas in np.arange(-90, 91, 10):
