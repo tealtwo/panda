@@ -203,15 +203,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
     }
 
     bool acc_main_on_tx = GET_BIT(to_send, 66U);
-    if (acc_main_on && !acc_main_on_tx) {
-      acc_main_on_mismatches += 1U;
-      if (acc_main_on_mismatches >= 25U) {
-        acc_main_on = acc_main_on_tx;
-        mads_check_acc_main();
-      }
-    } else {
-      acc_main_on_mismatches = 0U;
-    }
+    hyundai_common_reset_acc_main(acc_main_on_tx);
   }
 
   return tx;
