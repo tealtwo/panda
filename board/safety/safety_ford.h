@@ -185,7 +185,7 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
       mads_check_acc_main();
     }
 
-    if ((addr == FORD_Steering_Data_FD1) && enable_mads) {
+    if (addr == FORD_Steering_Data_FD1) {
       lkas_button = GET_BIT(to_push, 40U);
       mads_check_lkas_button();
     }

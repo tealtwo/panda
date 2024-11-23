@@ -189,6 +189,10 @@ bool get_honda_fwd_brake(void){
   return honda_fwd_brake;
 }
 
+void set_enable_mads(bool c){
+  enable_mads = c;
+}
+
 void init_tests(void){
   // get HW_TYPE from env variable set in test.sh
   if (getenv("HW_TYPE")) {

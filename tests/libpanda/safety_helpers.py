@@ -53,6 +53,8 @@ def setup_safety_helpers(ffi):
   void set_honda_alt_brake_msg(bool c);
   void set_honda_bosch_long(bool c);
   int get_honda_hw(void);
+
+  void set_enable_mads(bool c);
   """)
 
 class PandaSafety(Protocol):
@@ -107,4 +109,5 @@ class PandaSafety(Protocol):
   def set_honda_bosch_long(self, c: bool) -> None: ...
   def get_honda_hw(self) -> int: ...
 
+  def set_enable_mads(self, c: bool) -> None: ...
 
