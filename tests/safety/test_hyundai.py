@@ -72,7 +72,7 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libpanda_py.libpanda
-    self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI, 0)
+    self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI, Panda.FLAG_HYUNDAI_LFA_BUTTON)
     self.safety.init_tests()
 
   def _button_msg(self, buttons, main_button=0, bus=0):
@@ -112,6 +112,15 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
     return self.packer.make_can_msg_panda("LKAS11", 0, values)
 
+  def _scc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable, "AliveCounterACC": self.cnt_cruise % 16}
+    self.__class__.cnt_cruise += 1
+    return self.packer.make_can_msg_panda("SCC11", self.SCC_BUS, values)
+
+  def _lkas_button_msg(self):
+    values = {"LFA_Pressed": 1}
+    return self.packer.make_can_msg_panda("BCM_PO_11", 0, values)
+
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   MAX_RATE_UP = 2
@@ -121,7 +130,7 @@ class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libpanda_py.libpanda
-    self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI, Panda.FLAG_HYUNDAI_ALT_LIMITS)
+    self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI, Panda.FLAG_HYUNDAI_ALT_LIMITS | Panda.FLAG_HYUNDAI_LFA_BUTTON)
     self.safety.init_tests()
 
 
@@ -132,7 +141,7 @@ class TestHyundaiSafetyCameraSCC(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libpanda_py.libpanda
-    self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI, Panda.FLAG_HYUNDAI_CAMERA_SCC)
+    self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI, Panda.FLAG_HYUNDAI_CAMERA_SCC | Panda.FLAG_HYUNDAI_LFA_BUTTON)
     self.safety.init_tests()
 
 
@@ -142,6 +151,9 @@ class TestHyundaiLegacySafety(TestHyundaiSafety):
     self.safety = libpanda_py.libpanda
     self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI_LEGACY, 0)
     self.safety.init_tests()
+
+  def test_enable_control_allowed_lat_from_lkas(self):
+    pass
 
 
 class TestHyundaiLegacySafetyEV(TestHyundaiSafety):
@@ -155,6 +167,9 @@ class TestHyundaiLegacySafetyEV(TestHyundaiSafety):
     values = {"Accel_Pedal_Pos": gas}
     return self.packer.make_can_msg_panda("E_EMS11", 0, values, fix_checksum=checksum)
 
+  def test_enable_control_allowed_lat_from_lkas(self):
+    pass
+
 
 class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
   def setUp(self):
@@ -167,6 +182,10 @@ class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
     values = {"CR_Vcu_AccPedDep_Pos": gas}
     return self.packer.make_can_msg_panda("E_EMS11", 0, values, fix_checksum=checksum)
 
+  def test_enable_control_allowed_lat_from_lkas(self):
+    pass
+
+
 class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
   TX_MSGS = [[0x340, 0], [0x4F1, 0], [0x485, 0], [0x420, 0], [0x421, 0], [0x50A, 0], [0x389, 0], [0x4A2, 0], [0x38D, 0], [0x483, 0], [0x7D0, 0]]
 
@@ -178,7 +197,7 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libpanda_py.libpanda
-    self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI, Panda.FLAG_HYUNDAI_LONG)
+    self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI, Panda.FLAG_HYUNDAI_LONG | Panda.FLAG_HYUNDAI_LFA_BUTTON)
     self.safety.init_tests()
 
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
@@ -220,7 +239,7 @@ class TestHyundaiLongitudinalESCCSafety(HyundaiLongitudinalBase, TestHyundaiSafe
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libpanda_py.libpanda
-    self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI, Panda.FLAG_HYUNDAI_LONG | Panda.FLAG_HYUNDAI_ESCC)
+    self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI, Panda.FLAG_HYUNDAI_LONG | Panda.FLAG_HYUNDAI_ESCC | Panda.FLAG_HYUNDAI_LFA_BUTTON)
     self.safety.init_tests()
 
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
