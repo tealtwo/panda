@@ -152,7 +152,7 @@ class TestHyundaiLegacySafety(TestHyundaiSafety):
     self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI_LEGACY, 0)
     self.safety.init_tests()
 
-  def test_enable_control_allowed_lat_from_lkas(self):
+  def test_lkas_button(self):
     pass
 
 
@@ -167,7 +167,7 @@ class TestHyundaiLegacySafetyEV(TestHyundaiSafety):
     values = {"Accel_Pedal_Pos": gas}
     return self.packer.make_can_msg_panda("E_EMS11", 0, values, fix_checksum=checksum)
 
-  def test_enable_control_allowed_lat_from_lkas(self):
+  def test_lkas_button(self):
     pass
 
 
@@ -182,7 +182,7 @@ class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
     values = {"CR_Vcu_AccPedDep_Pos": gas}
     return self.packer.make_can_msg_panda("E_EMS11", 0, values, fix_checksum=checksum)
 
-  def test_enable_control_allowed_lat_from_lkas(self):
+  def test_lkas_button(self):
     pass
 
 
