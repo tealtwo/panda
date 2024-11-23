@@ -222,7 +222,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
 
   def test_lkas_button(self):
     self.safety.set_enable_mads(True)
-    self.safety.set_controls_allowed(False)
+    self.safety.set_controls_allowed_lat(False)
     self._rx(self._lkas_button_msg())
     self.assertTrue(self.safety.get_controls_allowed_lat())
 
