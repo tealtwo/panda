@@ -198,6 +198,21 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
     }
     return self.packer.make_can_msg_panda("Steering_Data_FD1", bus, values)
 
+  def _acc_state_msg(self, main_on):
+    brake = self.safety.get_brake_pressed_prev()
+    values = {
+      "BpedDrvAppl_D_Actl": 2 if brake else 1,
+      "CcStat_D_Actl": 5 if main_on else 0,
+    }
+    return self.packer.make_can_msg_panda("EngBrakeData", 0, values)
+
+  def test_disengage_on_main(self):
+    self.safety.set_controls_allowed(True)
+    self._rx(self._acc_state_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self._rx(self._acc_state_msg(False))
+    self.assertFalse(self.safety.get_controls_allowed())
+
   def test_rx_hook(self):
     # checksum, counter, and quality flag checks
     for quality_flag in [True, False]:
