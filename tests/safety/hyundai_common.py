@@ -87,7 +87,7 @@ class HyundaiButtonBase:
           self._rx(self._scc_state_msg(enable))
           self.assertEqual(enable, self.safety.get_acc_main_on())
 
-  def test_enable_control_allowed_lat_from_lkas(self):
+  def test_lkas_button(self):
     for enable_mads in (True, False):
       for enable in (True, False):
         self.safety.set_enable_mads(enable_mads)
