@@ -43,7 +43,6 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 
 static const int HYUNDAI_PARAM_LFA_BUTTON = 1024;
 static bool hyundai_legacy = false;
-static bool hyundai_lfa_button = false;
 
 static uint8_t hyundai_get_counter(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
@@ -169,7 +168,7 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
       brake_pressed = ((GET_BYTE(to_push, 5) >> 5U) & 0x3U) == 0x2U;
     }
 
-    if ((addr == 0x391) && hyundai_lfa_button && enable_mads) {
+    if (addr == 0x391) {
       lkas_button = GET_BIT(to_push, 4U);
       mads_check_lkas_button();
     }
@@ -316,7 +315,6 @@ static safety_config hyundai_init(uint16_t param) {
 
   hyundai_common_init(param);
   hyundai_legacy = false;
-  hyundai_lfa_button = GET_FLAG(param, HYUNDAI_PARAM_LFA_BUTTON);
 
   if (hyundai_camera_scc) {
     hyundai_longitudinal = false;
@@ -361,7 +359,6 @@ static safety_config hyundai_legacy_init(uint16_t param) {
   hyundai_legacy = true;
   hyundai_longitudinal = false;
   hyundai_camera_scc = false;
-  hyundai_lfa_button = GET_FLAG(param, HYUNDAI_PARAM_LFA_BUTTON);
   return BUILD_SAFETY_CFG(hyundai_legacy_rx_checks, HYUNDAI_TX_MSGS);
 }
 

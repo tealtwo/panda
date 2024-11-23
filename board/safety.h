@@ -89,7 +89,6 @@ bool disengage_lateral_on_brake = false;
 bool disengaged_from_brakes = false;
 bool controls_allowed_lat = false;
 bool lkas_button = false;
-bool lkas_button_prev = false;
 bool acc_main_on_prev = false;
 bool main_button_prev = false;
 uint32_t acc_main_on_mismatches = 0;

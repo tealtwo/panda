@@ -89,11 +89,10 @@ class HyundaiButtonBase:
 
   def test_lkas_button(self):
     for enable_mads in (True, False):
-      for enable in (True, False):
-        self.safety.set_enable_mads(enable_mads)
-        self.safety.set_controls_allowed_lat(enable)
-        self._rx(self._lkas_button_msg())
-        self.assertEqual(enable, self.safety.get_controls_allowed_lat())
+      self.safety.set_enable_mads(enable_mads)
+      self.safety.set_controls_allowed_lat(False)
+      self._rx(self._lkas_button_msg())
+      self.assertEqual(enable_mads, self.safety.get_controls_allowed_lat())
 
 
 class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):

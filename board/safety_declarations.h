@@ -220,7 +220,6 @@ extern bool disengage_lateral_on_brake;
 extern bool disengaged_from_brakes;
 extern bool controls_allowed_lat;
 extern bool lkas_button;
-extern bool lkas_button_prev;
 extern bool acc_main_on_prev;
 extern bool main_button_prev;
 extern uint32_t acc_main_on_mismatches;
