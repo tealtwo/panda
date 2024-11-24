@@ -252,7 +252,10 @@ static safety_config chrysler_init(uint16_t param) {
   static const CanMsg CHRYSLER_RAM_DT_TX_MSGS[] = {
     {CHRYSLER_RAM_DT_ADDRS.CRUISE_BUTTONS, 2, 3},
     {CHRYSLER_RAM_DT_ADDRS.LKAS_COMMAND, 0, 8},
+    {CHRYSLER_RAM_DT_ADDRS.LKAS_COMMAND, 1, 6},
     {CHRYSLER_RAM_DT_ADDRS.DAS_6, 0, 8},
+    {CHRYSLER_RAM_DT_ADDRS.DAS_6, 1, 8},
+    {CHRYSLER_RAM_DT_ADDRS.ESP_8, 1, 8},
   };
 
 #ifdef ALLOW_DEBUG
