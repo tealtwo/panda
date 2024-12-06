@@ -23,7 +23,8 @@ class MadsCommonBase(unittest.TestCase):
       self._mads_states_cleanup()
       raise unittest.SkipTest("Skipping test because _button_msg is not implemented for this car. If you know it, please implement it.")
 
-    raise NotImplementedError("Since _button_msg is implemented, _main_cruise_button_msg should be implemented as well to signal the main cruise button press")
+    raise NotImplementedError(
+      "Since _button_msg is implemented, _main_cruise_button_msg should be implemented as well to signal the main cruise button press")
 
   @abstractmethod
   def _acc_state_msg(self, enabled):
@@ -162,31 +163,33 @@ class MadsCommonBase(unittest.TestCase):
         with self.subTest("enable_mads", mads_enabled=enable_mads):
           self._mads_states_cleanup()
           self.safety.set_enable_mads(enable_mads, False)
-  
+
           # Initial state - both flags should be unset
           self._rx(self._speed_msg(0))
           initial_flags = self.safety.get_mads_state_flags()
           self.assertEqual(initial_flags & MadsStates.MAIN_BUTTON_AVAILABLE, MadsStates.DEFAULT)  # Main button flag
           self.assertEqual(initial_flags & MadsStates.LKAS_BUTTON_AVAILABLE, MadsStates.DEFAULT)  # LKAS button flag
-  
+
           # Set only main button
           self.safety.set_main_button_press(0)
           self._rx(self._speed_msg(0))
           main_only_flags = self.safety.get_mads_state_flags()
-          self.assertEqual(main_only_flags & MadsStates.MAIN_BUTTON_AVAILABLE, MadsStates.MAIN_BUTTON_AVAILABLE)  # Main button flag should be set
+          self.assertEqual(main_only_flags & MadsStates.MAIN_BUTTON_AVAILABLE,
+                           MadsStates.MAIN_BUTTON_AVAILABLE)  # Main button flag should be set
           self.assertEqual(main_only_flags & MadsStates.LKAS_BUTTON_AVAILABLE, MadsStates.DEFAULT)  # LKAS button flag should still be unset
-  
+
           # Set LKAS button and verify both flags
           self.safety.set_lkas_button_press(0)
           self._rx(self._speed_msg(0))
           both_flags = self.safety.get_mads_state_flags()
-          self.assertEqual(both_flags & MadsStates.MAIN_BUTTON_AVAILABLE, MadsStates.MAIN_BUTTON_AVAILABLE)  # Main button flag should remain set
+          self.assertEqual(both_flags & MadsStates.MAIN_BUTTON_AVAILABLE,
+                           MadsStates.MAIN_BUTTON_AVAILABLE)  # Main button flag should remain set
           self.assertEqual(both_flags & MadsStates.LKAS_BUTTON_AVAILABLE, MadsStates.LKAS_BUTTON_AVAILABLE)  # LKAS button flag should be set
-  
+
           # Verify that using | instead of & would give different results
           self.assertNotEqual(both_flags & MadsStates.MAIN_BUTTON_AVAILABLE, both_flags | MadsStates.MAIN_BUTTON_AVAILABLE)
           self.assertNotEqual(both_flags & MadsStates.LKAS_BUTTON_AVAILABLE, both_flags | MadsStates.LKAS_BUTTON_AVAILABLE)
-  
+
           # Reset flags and verify they're cleared
           self._mads_states_cleanup()
           self._rx(self._speed_msg(0))
@@ -204,17 +207,17 @@ class MadsCommonBase(unittest.TestCase):
         with self.subTest("enable_mads", mads_enabled=enable_mads):
           self._mads_states_cleanup()
           self.safety.set_enable_mads(enable_mads, False)
-  
+
           # Set main button and verify flag
           self.safety.set_main_button_press(0)
           self._rx(self._speed_msg(0))
           self.assertEqual(self.safety.get_mads_state_flags() & MadsStates.MAIN_BUTTON_AVAILABLE, MadsStates.MAIN_BUTTON_AVAILABLE)
-  
+
           # Reset main button to -1, flag should persist
           self.safety.set_main_button_press(-1)
           self._rx(self._speed_msg(0))
           self.assertEqual(self.safety.get_mads_state_flags() & MadsStates.MAIN_BUTTON_AVAILABLE, MadsStates.MAIN_BUTTON_AVAILABLE)
-  
+
           # Set LKAS button and verify both flags
           self.safety.set_lkas_button_press(0)
           self._rx(self._speed_msg(0))
@@ -227,20 +230,20 @@ class MadsCommonBase(unittest.TestCase):
   def test_mads_state_flags_individual_control(self):
     """Test the ability to individually control state flags.
     Verifies that flags can be set and cleared independently."""
-    
+
     try:
       for enable_mads in (True, False):
         with self.subTest("enable_mads", mads_enabled=enable_mads):
           self._mads_states_cleanup()
           self.safety.set_enable_mads(enable_mads, False)
-  
+
           # Set main button flag only
           self.safety.set_main_button_press(0)
           self._rx(self._speed_msg(0))
           main_flags = self.safety.get_mads_state_flags()
           self.assertEqual(main_flags & MadsStates.MAIN_BUTTON_AVAILABLE, MadsStates.MAIN_BUTTON_AVAILABLE)
           self.assertEqual(main_flags & MadsStates.LKAS_BUTTON_AVAILABLE, MadsStates.DEFAULT)
-  
+
           # Reset flags and set LKAS only
           self._mads_states_cleanup()
           self.safety.set_lkas_button_press(0)
@@ -248,7 +251,7 @@ class MadsCommonBase(unittest.TestCase):
           lkas_flags = self.safety.get_mads_state_flags()
           self.assertEqual(lkas_flags & MadsStates.MAIN_BUTTON_AVAILABLE, MadsStates.DEFAULT)
           self.assertEqual(lkas_flags & MadsStates.LKAS_BUTTON_AVAILABLE, MadsStates.LKAS_BUTTON_AVAILABLE)
-  
+
           # Set both flags
           self._mads_states_cleanup()
           self.safety.set_main_button_press(0)
@@ -257,7 +260,7 @@ class MadsCommonBase(unittest.TestCase):
           both_flags = self.safety.get_mads_state_flags()
           self.assertEqual(both_flags & MadsStates.MAIN_BUTTON_AVAILABLE, MadsStates.MAIN_BUTTON_AVAILABLE)
           self.assertEqual(both_flags & MadsStates.LKAS_BUTTON_AVAILABLE, MadsStates.LKAS_BUTTON_AVAILABLE)
-  
+
           # Clear all flags and verify
           self._mads_states_cleanup()
           self._rx(self._speed_msg(0))
@@ -266,7 +269,6 @@ class MadsCommonBase(unittest.TestCase):
           self.assertEqual(final_flags & MadsStates.LKAS_BUTTON_AVAILABLE, MadsStates.DEFAULT)
     finally:
       self._mads_states_cleanup()
-
 
   def test_enable_and_disable_lateral_control_with_cruise_button_only(self):
     """Test Scenario 1: Car with only cruise button, toggle MADS with cruise button"""
