@@ -237,44 +237,42 @@ class MadsCommonBase(unittest.TestCase):
         self.assertEqual(final_flags & MadsStates.LKAS_BUTTON_AVAILABLE, MadsStates.DEFAULT)
 
 
-class MadsButtonScenarioTests(MadsCommonBase):
-  #TODO-SP one more test for when we were engaged either way and cruise / pcm went to off
   def test_enable_and_disable_lateral_control_with_cruise_button_only(self):
     """Test Scenario 1: Car with only cruise button, toggle MADS with cruise button"""
-    self.safety.set_enable_mads(True, False)
+    try:
+      self.safety.set_enable_mads(True, False)
+      self._mads_states_cleanup()
 
-    # First press - should enable
-    self._mads_states_cleanup()
-    self._rx(self._main_cruise_button_msg(True))  # Press
-    self._rx(self._main_cruise_button_msg(False))  # Release
-    self.assertTrue(self.safety.get_controls_allowed_lat())
+      self._rx(self._main_cruise_button_msg(True))
+      self._rx(self._main_cruise_button_msg(False))
+      self.assertTrue(self.safety.get_controls_allowed_lat())
 
-    # Second press - should disable
-    self._rx(self._main_cruise_button_msg(True))  # Press
-    self._rx(self._main_cruise_button_msg(False))  # Release
-    self.assertFalse(self.safety.get_controls_allowed_lat())
-    self._mads_states_cleanup()
+      self._rx(self._main_cruise_button_msg(True))
+      self._rx(self._main_cruise_button_msg(False))
+      self.assertFalse(self.safety.get_controls_allowed_lat())
+    finally:
+      self._mads_states_cleanup()
 
   def test_enable_and_disable_lateral_control_with_cruise_button_when_lfa_present(self):
     """Test Scenario 2: Car with both buttons, toggle MADS with cruise button"""
     try:
-      self._lkas_button_msg(False)  # Check if LKAS button exists
+      self._lkas_button_msg(False)
     except NotImplementedError:
       raise unittest.SkipTest("Skipping test because LKAS button not supported")
 
-    self.safety.set_enable_mads(True, False)
+    try:
+      self.safety.set_enable_mads(True, False)
+      self._mads_states_cleanup()
 
-    # First press - should enable
-    self._mads_states_cleanup()
-    self._rx(self._main_cruise_button_msg(True))  # Press
-    self._rx(self._main_cruise_button_msg(False))  # Release
-    self.assertTrue(self.safety.get_controls_allowed_lat())
+      self._rx(self._main_cruise_button_msg(True))
+      self._rx(self._main_cruise_button_msg(False))
+      self.assertTrue(self.safety.get_controls_allowed_lat())
 
-    # Second press - should disable
-    self._rx(self._main_cruise_button_msg(True))  # Press
-    self._rx(self._main_cruise_button_msg(False))  # Release
-    self.assertFalse(self.safety.get_controls_allowed_lat())
-    self._mads_states_cleanup()
+      self._rx(self._main_cruise_button_msg(True))
+      self._rx(self._main_cruise_button_msg(False))
+      self.assertFalse(self.safety.get_controls_allowed_lat())
+    finally:
+      self._mads_states_cleanup()
 
   def test_enable_lateral_control_with_cruise_and_disable_with_lfa(self):
     """Test Scenario 3: Enable with cruise, disable with LFA"""
@@ -283,19 +281,19 @@ class MadsButtonScenarioTests(MadsCommonBase):
     except NotImplementedError:
       raise unittest.SkipTest("Skipping test because LKAS button not supported")
 
-    self.safety.set_enable_mads(True, False)
+    try:
+      self.safety.set_enable_mads(True, False)
+      self._mads_states_cleanup()
 
-    # Enable with cruise
-    self._mads_states_cleanup()
-    self._rx(self._main_cruise_button_msg(True))  # Press
-    self._rx(self._main_cruise_button_msg(False))  # Release
-    self.assertTrue(self.safety.get_controls_allowed_lat())
+      self._rx(self._main_cruise_button_msg(True))
+      self._rx(self._main_cruise_button_msg(False))
+      self.assertTrue(self.safety.get_controls_allowed_lat())
 
-    # Disable with LFA
-    self._rx(self._lkas_button_msg(True))  # Press
-    self._rx(self._lkas_button_msg(False))  # Release
-    self.assertFalse(self.safety.get_controls_allowed_lat())
-    self._mads_states_cleanup()
+      self._rx(self._lkas_button_msg(True))
+      self._rx(self._lkas_button_msg(False))
+      self.assertFalse(self.safety.get_controls_allowed_lat())
+    finally:
+      self._mads_states_cleanup()
 
   def test_enable_lateral_control_with_lfa_and_disable_with_cruise(self):
     """Test Scenario 4: Enable with LFA, disable with cruise"""
@@ -304,19 +302,19 @@ class MadsButtonScenarioTests(MadsCommonBase):
     except NotImplementedError:
       raise unittest.SkipTest("Skipping test because LKAS button not supported")
 
-    self.safety.set_enable_mads(True, False)
+    try:
+      self.safety.set_enable_mads(True, False)
+      self._mads_states_cleanup()
 
-    # Enable with LFA
-    self._mads_states_cleanup()
-    self._rx(self._lkas_button_msg(True))  # Press
-    self._rx(self._lkas_button_msg(False))  # Release
-    self.assertTrue(self.safety.get_controls_allowed_lat())
+      self._rx(self._lkas_button_msg(True))
+      self._rx(self._lkas_button_msg(False))
+      self.assertTrue(self.safety.get_controls_allowed_lat())
 
-    # Disable with cruise
-    self._rx(self._main_cruise_button_msg(True))  # Press
-    self._rx(self._main_cruise_button_msg(False))  # Release
-    self.assertFalse(self.safety.get_controls_allowed_lat())
-    self._mads_states_cleanup()
+      self._rx(self._main_cruise_button_msg(True))
+      self._rx(self._main_cruise_button_msg(False))
+      self.assertFalse(self.safety.get_controls_allowed_lat())
+    finally:
+      self._mads_states_cleanup()
 
   def test_enable_and_disable_lateral_control_with_lfa_button(self):
     """Test Scenario 5: Toggle MADS with LFA button"""
@@ -325,16 +323,16 @@ class MadsButtonScenarioTests(MadsCommonBase):
     except NotImplementedError:
       raise unittest.SkipTest("Skipping test because LKAS button not supported")
 
-    self.safety.set_enable_mads(True, False)
+    try:
+      self.safety.set_enable_mads(True, False)
+      self._mads_states_cleanup()
 
-    # First press - should enable
-    self._mads_states_cleanup()
-    self._rx(self._lkas_button_msg(True))  # Press
-    self._rx(self._lkas_button_msg(False))  # Release
-    self.assertTrue(self.safety.get_controls_allowed_lat())
+      self._rx(self._lkas_button_msg(True))
+      self._rx(self._lkas_button_msg(False))
+      self.assertTrue(self.safety.get_controls_allowed_lat())
 
-    # Second press - should disable
-    self._rx(self._lkas_button_msg(True))  # Press
-    self._rx(self._lkas_button_msg(False))  # Release
-    self.assertFalse(self.safety.get_controls_allowed_lat())
-    self._mads_states_cleanup()
+      self._rx(self._lkas_button_msg(True))
+      self._rx(self._lkas_button_msg(False))
+      self.assertFalse(self.safety.get_controls_allowed_lat())
+    finally:
+      self._mads_states_cleanup()

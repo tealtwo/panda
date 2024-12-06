@@ -3,7 +3,6 @@ import unittest
 import panda.tests.safety.common as common
 from panda.tests.libpanda import libpanda_py
 from panda.tests.safety.common import make_msg
-from panda.tests.safety.mads_common import MadsButtonScenarioTests
 
 
 class Buttons:
@@ -74,7 +73,7 @@ class HyundaiButtonBase:
       self._rx(self._button_msg(Buttons.NONE))
 
 
-class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest, MadsButtonScenarioTests):
+class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
   # pylint: disable=no-member,abstract-method
 
   DISABLED_ECU_UDS_MSG: tuple[int, int]
