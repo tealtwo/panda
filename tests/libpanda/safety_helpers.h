@@ -48,11 +48,11 @@ void set_enable_mads(bool enable_mads, bool disengage_lat_on_brake){
 }
 
 bool get_enable_mads(void){
-  return _mads_state.system_enabled;
+  return get_mads_state()->system_enabled;
 }
 
 bool get_disengage_lat_on_brake(void){
-  return _mads_state.disengage_lateral_on_brake;
+  return get_mads_state()->disengage_lateral_on_brake;
 }
 
 int get_alternative_experience(void){
@@ -210,23 +210,23 @@ int get_main_button_press(void){
 }
 
 void set_mads_state_flags(int flags){
-  _mads_state.state_flags = flags;
+  m_mads_state.state_flags = flags;
 }
 
 int get_mads_state_flags(void){
-  return _mads_state.state_flags; 
+  return get_mads_state()->state_flags; 
 }
 
 int get_mads_main_button_transition(void){
-  return _mads_state.main_button.transition;
+  return get_mads_state()->main_button.transition;
 }
 
 int get_mads_main_button_current(void){
-  return *_mads_state.main_button.current;
+  return *m_mads_state.main_button.current;
 }
 
 int get_mads_main_button_last(void){
-  return _mads_state.main_button.last;
+  return get_mads_state()->main_button.last;
 }
 
 void set_main_button_press(int c){
@@ -242,27 +242,34 @@ int get_lkas_button_press(void){
 }
 
 void set_controls_allowed_lat(bool c){
-  _mads_state.controls_allowed_lat = c;
+  m_mads_state.controls_allowed_lat = c;
 }
 
 bool get_main_button_engaged(void){
-  return _mads_state.main_button.is_engaged;
+  return get_mads_state()->main_button.is_engaged;
 }
 
 bool get_lkas_button_engaged(void){
-  return _mads_state.lkas_button.is_engaged;
+  return get_mads_state()->lkas_button.is_engaged;
 }
 
 void set_main_button_engaged(bool c){
-  _mads_state.main_button.is_engaged = c;
+  m_mads_state.main_button.is_engaged = c;
 }
 
 void set_lkas_button_engaged(bool c){
-  _mads_state.lkas_button.is_engaged = c;
+  m_mads_state.lkas_button.is_engaged = c;
 }
 
 int get_mads_acc_main(void){
-  return *_mads_state.acc_main.current;
+  return *m_mads_state.acc_main.current;
+}
+
+int mads_get_current_disengage_reason(void) {
+  return get_mads_state()->current_disengage.reason;
+}
+int mads_get_previous_disengage_reason(void) {
+  return get_mads_state()->previous_disengage.reason;
 }
 
 //int get_temp_debug(void){

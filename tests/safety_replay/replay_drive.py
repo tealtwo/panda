@@ -19,7 +19,7 @@ def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
     init_segment(safety, lr, safety_mode, param)
     lr.reset()
 
-  rx_tot, rx_invalid, tx_tot, tx_blocked, tx_controls, tx_controls_blocked = 0, 0, 0, 0, 0, 0
+  rx_tot, rx_invalid, tx_tot, tx_blocked, tx_controls, tx_controls_lat, tx_controls_blocked, tx_controls_lat_blocked = 0, 0, 0, 0, 0, 0, 0, 0
   safety_tick_rx_invalid = False
   blocked_addrs = Counter()
   invalid_addrs = set()
@@ -42,15 +42,22 @@ def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
         if not sent:
           tx_blocked += 1
           tx_controls_blocked += safety.get_controls_allowed()
+          tx_controls_lat_blocked += safety.get_controls_allowed_lat()
           blocked_addrs[canmsg.address] += 1
 
           if "DEBUG" in os.environ:
-            print(f"blocked bus {canmsg.src} msg {hex(canmsg.address)} at {(msg.logMonoTime - start_t) / 1e9} | " +
-                  f"lat [{safety.get_lat_active()}] | alwd [{safety.get_controls_allowed_lat()}] | " +
-                  f"main_on [{safety.get_acc_main_on()}] | " +
-                  f"flags [{safety.get_mads_state_flags()}] | " +
-                  f"mads_main [{safety.get_mads_acc_main()}] ")
+            print(f"blocked bus {canmsg.src} msg {hex(canmsg.address)} at {(msg.logMonoTime - start_t) / 1e9}|\t" +
+                  f"lat [{safety.get_lat_active()}]|\t" +
+                  f"alwd [{safety.get_controls_allowed_lat()}]|\t" +
+                  f"cur_dis_r [{safety.mads_get_current_disengage_reason()}]|\t" +
+                  f"prev_dis_r [{safety.mads_get_previous_disengage_reason()}]|\t" +
+                  # f"main_on [{safety.get_acc_main_on()}]|\t" +
+                  # f"flags [{safety.get_mads_state_flags()}]|\t" +
+                  # f"mads_main [{safety.get_mads_acc_main()}]|\t" +
+                  # f"main_engaged [{safety.get_main_button_engaged()}]|\t" +
+                  f"lkas_engaged [{safety.get_lkas_button_engaged()}]")
         tx_controls += safety.get_controls_allowed()
+        tx_controls_lat += safety.get_controls_allowed_lat()
         tx_tot += 1
     elif msg.which() == 'can':
       # ignore msgs we sent
@@ -70,12 +77,14 @@ def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
   print("\nTX")
   print("total openpilot msgs:", tx_tot)
   print("total msgs with controls allowed:", tx_controls)
+  print("total msgs with controls_lat allowed:", tx_controls_lat)
   print("blocked msgs:", tx_blocked)
   print("blocked with controls allowed:", tx_controls_blocked)
+  print("blocked with controls_lat allowed:", tx_controls_lat_blocked)
   print("blocked addrs:", blocked_addrs)
   print("mads enabled:", safety.get_enable_mads())
 
-  return tx_controls_blocked == 0 and rx_invalid == 0 and not safety_tick_rx_invalid
+  return tx_controls_blocked == 0 and tx_controls_lat_blocked == 0 and rx_invalid == 0 and not safety_tick_rx_invalid
 
 if __name__ == "__main__":
   from openpilot.tools.lib.logreader import LogReader
