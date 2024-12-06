@@ -69,11 +69,6 @@ def setup_safety_helpers(ffi):
   void set_controls_allowed_lat(bool c);
   void set_controls_requested_lat(bool c);
 
-  //bool get_main_button_engaged(void);
-  //bool get_lkas_button_engaged(void);
-  //void set_main_button_engaged(bool engaged);
-  //void set_lkas_button_engaged(bool engaged);
-
   int get_mads_acc_main(void);
   void set_acc_main_on(bool c);
   int get_lkas_button_press(void);

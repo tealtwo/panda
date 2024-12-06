@@ -185,6 +185,7 @@ inline void mads_exit_controls(DisengageReason reason) {
 static void m_mads_try_allow_controls_lat(void) {
   if (m_mads_state.controls_requested_lat && !m_mads_state.controls_allowed_lat && m_can_allow_controls_lat()) {
     m_mads_state.controls_allowed_lat = true;
+    m_mads_state.previous_disengage = m_mads_state.current_disengage;
     m_mads_state.current_disengage.reason = MADS_DISENGAGE_REASON_NONE;
   }
 }

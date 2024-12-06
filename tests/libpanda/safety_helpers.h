@@ -249,22 +249,6 @@ void set_controls_allowed_lat(bool c){
   m_mads_state.controls_allowed_lat = c;
 }
 
-//bool get_main_button_engaged(void){
-//  return get_mads_state()->main_button.is_engaged;
-//}
-
-//bool get_lkas_button_engaged(void){
-//  return get_mads_state()->lkas_button.is_engaged;
-//}
-
-//void set_main_button_engaged(bool c){
-//  m_mads_state.main_button.is_engaged = c;
-//}
-//
-//void set_lkas_button_engaged(bool c){
-//  m_mads_state.lkas_button.is_engaged = c;
-//}
-
 int get_mads_acc_main(void){
   return *m_mads_state.acc_main.current;
 }

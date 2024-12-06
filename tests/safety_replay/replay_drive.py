@@ -48,14 +48,10 @@ def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
           if "DEBUG" in os.environ:
             print(f"blocked bus {canmsg.src} msg {hex(canmsg.address)} at {(msg.logMonoTime - start_t) / 1e9}|\t" +
                   f"lat [{safety.get_lat_active()}]|\t" +
+                  f"req [{safety.get_controls_requested_lat()}]|\t" +
                   f"alwd [{safety.get_controls_allowed_lat()}]|\t" +
                   f"cur_dis_r [{safety.mads_get_current_disengage_reason()}]|\t" +
-                  f"prev_dis_r [{safety.mads_get_previous_disengage_reason()}]|\t" +
-                  # f"main_on [{safety.get_acc_main_on()}]|\t" +
-                  # f"flags [{safety.get_mads_state_flags()}]|\t" +
-                  # f"mads_main [{safety.get_mads_acc_main()}]|\t" +
-                  # f"main_engaged [{safety.get_main_button_engaged()}]|\t" +
-                  f"lkas_engaged [{safety.get_lkas_button_engaged()}]")
+                  f"prev_dis_r [{safety.mads_get_previous_disengage_reason()}]|\t")
         tx_controls += safety.get_controls_allowed()
         tx_controls_lat += safety.get_controls_allowed_lat()
         tx_tot += 1
