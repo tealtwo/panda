@@ -261,10 +261,10 @@ class HondaBase(common.PandaCarSafetyTest):
   def test_enable_control_from_lkas_button_press(self):
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
-        self.safety.set_enable_mads(enable_mads, False)
         for lkas_button_press in range(3):
           with self.subTest("lkas_button_press", button_state=lkas_button_press):
             self._mads_states_cleanup()
+            self.safety.set_enable_mads(enable_mads, False)
             self._rx(self._lkas_button_msg(lkas_button_press))
             self.assertEqual(enable_mads and lkas_button_press == 1, self.safety.get_controls_allowed_lat())
     self._mads_states_cleanup()

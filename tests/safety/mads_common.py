@@ -32,9 +32,9 @@ class MadsCommonBase(unittest.TestCase):
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
         for cruise_button_press in [True, False]:
-          self.safety.set_enable_mads(enable_mads, False)
           with self.subTest("cruise_button_press", cruise_button_press=cruise_button_press):
             self._mads_states_cleanup()
+            self.safety.set_enable_mads(enable_mads, False)
             self._rx(self._main_cruise_button_msg(cruise_button_press))
             self.assertEqual(enable_mads and cruise_button_press, self.safety.get_controls_allowed_lat())
     self._mads_states_cleanup()
@@ -48,9 +48,9 @@ class MadsCommonBase(unittest.TestCase):
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
         for lkas_button_press in [True, False]:
-          self.safety.set_enable_mads(enable_mads, False)
           with self.subTest("lkas_button_press", button_state=lkas_button_press):
             self._mads_states_cleanup()
+            self.safety.set_enable_mads(enable_mads, False)
             self._rx(self._lkas_button_msg(lkas_button_press))
             self.assertEqual(enable_mads and lkas_button_press, self.safety.get_controls_allowed_lat())
     self._mads_states_cleanup()
@@ -62,14 +62,15 @@ class MadsCommonBase(unittest.TestCase):
     self.safety.set_controls_requested_lat(False)
     self.safety.set_mads_state_flags(0)
     self.safety.set_acc_main_on(False)
+    self.safety.set_enable_mads(False, False)
 
   def test_enable_control_from_setting_main_state_manually(self):
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
-        self.safety.set_enable_mads(enable_mads, False)
         for main_button_press in (-1, 0, 1):
           with self.subTest("main_button_press", button_state=main_button_press):
             self._mads_states_cleanup()
+            self.safety.set_enable_mads(enable_mads, False)
             self.safety.set_main_button_press(main_button_press)
             self._rx(self._speed_msg(0))
             self.assertEqual(enable_mads and main_button_press == 1, self.safety.get_controls_allowed_lat())
@@ -78,10 +79,10 @@ class MadsCommonBase(unittest.TestCase):
   def test_enable_control_from_setting_lkas_state_manually(self):
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
-        self.safety.set_enable_mads(enable_mads, False)
         for lkas_button_press in (-1, 0, 1):
           with self.subTest("lkas_button_press", button_state=lkas_button_press):
             self._mads_states_cleanup()
+            self.safety.set_enable_mads(enable_mads, False)
             self.safety.set_lkas_button_press(lkas_button_press)
             self._rx(self._speed_msg(0))
             self.assertEqual(enable_mads and lkas_button_press == 1, self.safety.get_controls_allowed_lat())
@@ -90,8 +91,8 @@ class MadsCommonBase(unittest.TestCase):
   def test_mads_state_flags(self):
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
-        self.safety.set_enable_mads(enable_mads, False)
         self._mads_states_cleanup()
+        self.safety.set_enable_mads(enable_mads, False)
         self.safety.set_main_button_press(0)  # Meaning a message with those buttons was seen and the _prev inside is no longer -1
         self.safety.set_lkas_button_press(0)  # Meaning a message with those buttons was seen and the _prev inside is no longer -1
         self._rx(self._speed_msg(0))
@@ -103,10 +104,10 @@ class MadsCommonBase(unittest.TestCase):
     """Test that lateral controls are allowed when ACC main is enabled"""
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
-        self.safety.set_enable_mads(enable_mads, False)
         for acc_main_on in (True, False):
           with self.subTest("acc_main_on", acc_main_on=acc_main_on):
             self._mads_states_cleanup()
+            self.safety.set_enable_mads(enable_mads, False)
             self.safety.set_acc_main_on(acc_main_on)
             self._rx(self._speed_msg(0))
             self.assertEqual(enable_mads and acc_main_on, self.safety.get_controls_allowed_lat())
@@ -126,8 +127,10 @@ class MadsCommonBase(unittest.TestCase):
       with self.subTest("mads enabled", mads_enabled=mads_enabled):
         for disengage_on_brake in [True, False]:
           with self.subTest("disengage on brake", disengage_on_brake=disengage_on_brake):
+            self._mads_states_cleanup()
             self.safety.set_enable_mads(mads_enabled, disengage_on_brake)
             self.assertEqual(disengage_on_brake, self.safety.get_disengage_lat_on_brake())
+    self._mads_states_cleanup()
 
   def test_mads_state_flags_mutation(self):
     """Test to catch mutations in bitwise operations for state flags.
@@ -137,8 +140,8 @@ class MadsCommonBase(unittest.TestCase):
     # Test both MADS enabled and disabled states
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
-        self.safety.set_enable_mads(enable_mads, False)
         self._mads_states_cleanup()
+        self.safety.set_enable_mads(enable_mads, False)
 
         # Initial state - both flags should be unset
         self._rx(self._speed_msg(0))
@@ -176,8 +179,8 @@ class MadsCommonBase(unittest.TestCase):
 
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
-        self.safety.set_enable_mads(enable_mads, False)
         self._mads_states_cleanup()
+        self.safety.set_enable_mads(enable_mads, False)
 
         # Set main button and verify flag
         self.safety.set_main_button_press(0)
@@ -202,8 +205,8 @@ class MadsCommonBase(unittest.TestCase):
 
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
-        self.safety.set_enable_mads(enable_mads, False)
         self._mads_states_cleanup()
+        self.safety.set_enable_mads(enable_mads, False)
 
         # Set main button flag only
         self.safety.set_main_button_press(0)
@@ -240,8 +243,8 @@ class MadsCommonBase(unittest.TestCase):
   def test_enable_and_disable_lateral_control_with_cruise_button_only(self):
     """Test Scenario 1: Car with only cruise button, toggle MADS with cruise button"""
     try:
-      self.safety.set_enable_mads(True, False)
       self._mads_states_cleanup()
+      self.safety.set_enable_mads(True, False)
 
       self._rx(self._main_cruise_button_msg(True))
       self._rx(self._main_cruise_button_msg(False))
@@ -261,8 +264,8 @@ class MadsCommonBase(unittest.TestCase):
       raise unittest.SkipTest("Skipping test because LKAS button not supported")
 
     try:
-      self.safety.set_enable_mads(True, False)
       self._mads_states_cleanup()
+      self.safety.set_enable_mads(True, False)
 
       self._rx(self._main_cruise_button_msg(True))
       self._rx(self._main_cruise_button_msg(False))
@@ -282,8 +285,8 @@ class MadsCommonBase(unittest.TestCase):
       raise unittest.SkipTest("Skipping test because LKAS button not supported")
 
     try:
-      self.safety.set_enable_mads(True, False)
       self._mads_states_cleanup()
+      self.safety.set_enable_mads(True, False)
 
       self._rx(self._main_cruise_button_msg(True))
       self._rx(self._main_cruise_button_msg(False))
@@ -303,8 +306,8 @@ class MadsCommonBase(unittest.TestCase):
       raise unittest.SkipTest("Skipping test because LKAS button not supported")
 
     try:
-      self.safety.set_enable_mads(True, False)
       self._mads_states_cleanup()
+      self.safety.set_enable_mads(True, False)
 
       self._rx(self._lkas_button_msg(True))
       self._rx(self._lkas_button_msg(False))
@@ -324,8 +327,8 @@ class MadsCommonBase(unittest.TestCase):
       raise unittest.SkipTest("Skipping test because LKAS button not supported")
 
     try:
-      self.safety.set_enable_mads(True, False)
       self._mads_states_cleanup()
+      self.safety.set_enable_mads(True, False)
 
       self._rx(self._lkas_button_msg(True))
       self._rx(self._lkas_button_msg(False))
