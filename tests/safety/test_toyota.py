@@ -143,6 +143,12 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
             self.assertEqual(enable_mads and lkas_hud in range(1, 4), self.safety.get_controls_allowed_lat())
     self._mads_states_cleanup()
 
+  def test_enable_and_disable_lateral_control_with_lfa_button(self):
+    raise unittest.SkipTest("For Toyota, we only use the LFA detection to allow lateral control, not to disable it")
+
+  def test_enable_lateral_control_with_lfa_and_disable_with_cruise(self):
+    raise unittest.SkipTest("For Toyota, we only use the LFA detection to allow lateral control, not to disable it")
+
 
 class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
 

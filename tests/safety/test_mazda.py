@@ -81,7 +81,7 @@ class TestMazdaSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafe
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
-  def test_enable_control_from_cruise_button_press(self):
+  def _main_cruise_button_msg(self, enabled):
     raise unittest.SkipTest("Mazda does not enable controls from cruise button press, we only enable controls from the PCM status message")
 
 

@@ -269,6 +269,19 @@ class HondaBase(common.PandaCarSafetyTest):
             self.assertEqual(enable_mads and lkas_button_press == 1, self.safety.get_controls_allowed_lat())
     self._mads_states_cleanup()
 
+  def test_enable_and_disable_lateral_control_with_lfa_button(self):
+    raise unittest.SkipTest("For Honda, we only use the LFA detection to allow lateral control, not to disable it")
+
+  def test_enable_lateral_control_with_lfa_and_disable_with_cruise(self):
+    raise unittest.SkipTest("For Honda, we only use the LFA detection to allow lateral control, not to disable it")
+
+  def test_enable_and_disable_lateral_control_with_cruise_button_when_lfa_present(self):
+    raise unittest.SkipTest("For Honda, we only use the LFA detection to allow lateral control, not to disable it")
+
+  def test_enable_and_disable_lateral_control_with_cruise_button_only(self):
+    raise unittest.SkipTest("For Honda, we are only able to reliably know if the button was pressed, but not properly the button release / disengage")
+
+
 
 # ********************* Honda Nidec **********************
 

@@ -140,7 +140,7 @@ class TestGmSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
     values = {"ACCButtons": buttons}
     return self.packer.make_can_msg_panda("ASCMSteeringButton", self.BUTTONS_BUS, values)
 
-  def test_enable_control_from_cruise_button_press(self):
+  def _main_cruise_button_msg(self, enabled):
     raise unittest.SkipTest("GM does not enable controls from cruise button press, we only enable controls from the PCM status message")
 
 

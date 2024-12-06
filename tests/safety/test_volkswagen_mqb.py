@@ -134,7 +134,7 @@ class TestVolkswagenMqbSafety(common.PandaCarSafetyTest, common.DriverTorqueStee
     self.assertEqual(0, self.safety.get_torque_driver_max())
     self.assertEqual(0, self.safety.get_torque_driver_min())
 
-  def test_enable_control_from_cruise_button_press(self):
+  def _main_cruise_button_msg(self, enabled):
     raise unittest.SkipTest("Volkswagen does not enable controls from cruise button press, we only enable controls from the PCM status message")
 
 class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafety):

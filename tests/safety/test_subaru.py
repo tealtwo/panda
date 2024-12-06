@@ -121,6 +121,11 @@ class TestSubaruSafetyBase(common.PandaCarSafetyTest):
             self.assertEqual(enable_mads and lkas_hud in range(1, 4), self.safety.get_controls_allowed_lat())
     self._mads_states_cleanup()
 
+  def test_enable_and_disable_lateral_control_with_lfa_button(self):
+    raise unittest.SkipTest("For Subaru, we only use the LFA detection to allow lateral control, not to disable it")
+
+  def test_enable_and_disable_lateral_control_with_cruise_button_when_lfa_present(self):
+    raise unittest.SkipTest("For Subaru, we only use the LFA detection to allow lateral control, not to disable it")
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):
