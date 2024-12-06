@@ -43,6 +43,10 @@ bool get_controls_allowed_lat(void){
   return mads_is_lateral_control_allowed_by_mads();
 }
 
+bool get_controls_requested_lat(void){
+  return get_mads_state()->controls_requested_lat;
+}
+
 void set_enable_mads(bool enable_mads, bool disengage_lat_on_brake){
   mads_set_system_state(enable_mads, disengage_lat_on_brake);
 }
@@ -245,21 +249,21 @@ void set_controls_allowed_lat(bool c){
   m_mads_state.controls_allowed_lat = c;
 }
 
-bool get_main_button_engaged(void){
-  return get_mads_state()->main_button.is_engaged;
-}
+//bool get_main_button_engaged(void){
+//  return get_mads_state()->main_button.is_engaged;
+//}
 
-bool get_lkas_button_engaged(void){
-  return get_mads_state()->lkas_button.is_engaged;
-}
+//bool get_lkas_button_engaged(void){
+//  return get_mads_state()->lkas_button.is_engaged;
+//}
 
-void set_main_button_engaged(bool c){
-  m_mads_state.main_button.is_engaged = c;
-}
-
-void set_lkas_button_engaged(bool c){
-  m_mads_state.lkas_button.is_engaged = c;
-}
+//void set_main_button_engaged(bool c){
+//  m_mads_state.main_button.is_engaged = c;
+//}
+//
+//void set_lkas_button_engaged(bool c){
+//  m_mads_state.lkas_button.is_engaged = c;
+//}
 
 int get_mads_acc_main(void){
   return *m_mads_state.acc_main.current;
@@ -270,6 +274,10 @@ int mads_get_current_disengage_reason(void) {
 }
 int mads_get_previous_disengage_reason(void) {
   return get_mads_state()->previous_disengage.reason;
+}
+
+void set_controls_requested_lat(bool c){
+  m_mads_state.controls_requested_lat = c;
 }
 
 //int get_temp_debug(void){

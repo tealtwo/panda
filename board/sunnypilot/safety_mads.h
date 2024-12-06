@@ -148,12 +148,12 @@ static void m_mads_state_init(void) {
   m_mads_state.main_button.last = MADS_BUTTON_UNAVAILABLE;
   m_mads_state.main_button.transition = MADS_BUTTON_TRANSITION_NO_CHANGE;
   m_mads_state.main_button.press_timestamp = 0;
-  m_mads_state.main_button.is_engaged = false;
+  // m_mads_state.main_button.is_engaged = false;
 
   m_mads_state.lkas_button.last = MADS_BUTTON_UNAVAILABLE;
   m_mads_state.lkas_button.transition = MADS_BUTTON_TRANSITION_NO_CHANGE;
   m_mads_state.lkas_button.press_timestamp = 0;
-  m_mads_state.lkas_button.is_engaged = false;
+  // m_mads_state.lkas_button.is_engaged = false;
 
   // ACC main state initialization
   m_mads_state.acc_main.previous = false;
@@ -215,8 +215,9 @@ static void m_update_button_state(ButtonStateTracking *button_state, const Butto
     );
 
     if (button_state->transition == MADS_BUTTON_TRANSITION_TO_PRESSED) {
-      button_state->is_engaged = !button_state->is_engaged;
-      if (!button_state->is_engaged) {
+      // Toggle the controls_requested_lat state
+      m_mads_state.controls_requested_lat = !m_mads_state.controls_requested_lat;
+      if (!m_mads_state.controls_requested_lat) {
         mads_exit_controls(MADS_DISENGAGE_REASON_BUTTON);
       }
     }
@@ -250,11 +251,9 @@ inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_
   // Update other states
   m_mads_state.cruise_engaged = cruise_engaged;
 
-  //TODO-SP: theres a possibility of mismatching state if lat is engaged due to main button and disengaged due to lkas button. Need to validate if it's the case
+  //TODO-SP: Validate the acc_main, does it go to true when long is controlled? or when?
   // Use engagement state for lateral control
-  m_mads_state.controls_requested_lat = m_mads_state.main_button.is_engaged
-                                     || m_mads_state.lkas_button.is_engaged
-                                     || *m_mads_state.acc_main.current;
+  m_mads_state.controls_requested_lat = m_mads_state.controls_requested_lat || *m_mads_state.acc_main.current;
 
   // Check ACC main state and braking conditions
   m_mads_check_braking(is_braking);
