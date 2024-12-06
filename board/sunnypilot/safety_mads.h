@@ -95,8 +95,8 @@ inline const MADSState * get_mads_state(void) {
   return &m_mads_state;
 }
 
-// Helper function to determine if a disengagement reason allows auto-resume
-static bool m_can_auto_resume(void) {
+// Helper function to determine if a disengagement reason allows re-engagement of lateral controls
+static bool m_can_allow_controls_lat(void) {
   const MADSState *state = get_mads_state();
   bool result = false;
   if (state->system_enabled) {
@@ -105,13 +105,10 @@ static bool m_can_auto_resume(void) {
         result = !state->is_braking && state->disengage_lateral_on_brake;
         break;
       case MADS_DISENGAGE_REASON_LAG:
-        //Logic here should be if the previous disengage reason was lag and the time since the last disengage is more than 1 second
-        result = true;
-        break;
       case MADS_DISENGAGE_REASON_BUTTON:
       case MADS_DISENGAGE_REASON_NONE:
       default:
-        result = false;
+        result = true;
         break;
     }
   }
@@ -186,14 +183,9 @@ inline void mads_exit_controls(DisengageReason reason) {
 
 // Resume lateral controls
 static void m_mads_try_allow_controls_lat(void) {
-  DisengageReason current_disengage_reason = m_mads_state.current_disengage.reason;
-  if ((current_disengage_reason == MADS_DISENGAGE_REASON_NONE) || (current_disengage_reason == MADS_DISENGAGE_REASON_BUTTON)) {
-    m_mads_state.controls_allowed_lat = true;
-  } else if (m_can_auto_resume()) {
+  if (m_mads_state.controls_requested_lat && !m_mads_state.controls_allowed_lat && m_can_allow_controls_lat()) {
     m_mads_state.controls_allowed_lat = true;
     m_mads_state.current_disengage.reason = MADS_DISENGAGE_REASON_NONE;
-  } else {
-    // Nothing to do
   }
 }
 
@@ -259,9 +251,7 @@ inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_
   m_mads_check_braking(is_braking);
 
   // If controls are requested and currently disabled, check if we can enable
-  if (m_mads_state.controls_requested_lat && !m_mads_state.controls_allowed_lat) {
-    m_mads_try_allow_controls_lat();
-  }
+  m_mads_try_allow_controls_lat();
 
   // Update ACC main state
   m_mads_state.acc_main.previous = *m_mads_state.acc_main.current;
