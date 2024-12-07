@@ -221,10 +221,6 @@ int get_mads_state_flags(void){
   return get_mads_state()->state_flags; 
 }
 
-int get_mads_main_button_transition(void){
-  return get_mads_state()->main_button.transition;
-}
-
 int get_mads_main_button_current(void){
   return *m_mads_state.main_button.current;
 }

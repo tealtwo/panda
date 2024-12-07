@@ -56,13 +56,6 @@ def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
         to_send = package_can_msg(canmsg)
         sent = safety.safety_tx_hook(to_send)
 
-        # Update last good state if message is allowed
-        if sent:
-          last_good_states[canmsg.address].update({
-            'timestamp': (msg.logMonoTime - start_t) / 1e9,
-            **{var: getter(safety) for var, getter in DEBUG_VARS.items()}
-          })
-
         if not sent:
           tx_blocked += 1
           tx_controls_blocked += safety.get_controls_allowed()

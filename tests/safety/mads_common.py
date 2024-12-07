@@ -114,17 +114,35 @@ class MadsCommonBase(unittest.TestCase):
       self._mads_states_cleanup()
 
   def test_enable_control_from_acc_main_on(self):
-    """Test that lateral controls are allowed when ACC main is enabled"""
+    """Test that lateral controls are allowed when ACC main is enabled and disabled when ACC main is disabled"""
     try:
       for enable_mads in (True, False):
         with self.subTest("enable_mads", mads_enabled=enable_mads):
           for acc_main_on in (True, False):
-            with self.subTest("acc_main_on", acc_main_on=acc_main_on):
+            with self.subTest("initial_acc_main", initial_acc_main=acc_main_on):
               self._mads_states_cleanup()
               self.safety.set_enable_mads(enable_mads, False)
+
+              # Set initial state
               self.safety.set_acc_main_on(acc_main_on)
               self._rx(self._speed_msg(0))
-              self.assertEqual(enable_mads and acc_main_on, self.safety.get_controls_allowed_lat())
+              expected_lat = enable_mads and acc_main_on
+              self.assertEqual(expected_lat, self.safety.get_controls_allowed_lat(),
+                               f"Expected lat: [{expected_lat}] when acc_main_on goes to [{acc_main_on}]")
+
+              # Test transition to opposite state
+              self.safety.set_acc_main_on(not acc_main_on)
+              self._rx(self._speed_msg(0))
+              expected_lat = enable_mads and not acc_main_on
+              self.assertEqual(expected_lat, self.safety.get_controls_allowed_lat(),
+                               f"Expected lat: [{expected_lat}] when acc_main_on goes from [{acc_main_on}] to [{not acc_main_on}]")
+
+              # Test transition back to initial state
+              self.safety.set_acc_main_on(acc_main_on)
+              self._rx(self._speed_msg(0))
+              expected_lat = enable_mads and acc_main_on
+              self.assertEqual(expected_lat, self.safety.get_controls_allowed_lat(),
+                               f"Expected lat: [{expected_lat}] when acc_main_on goes from [{not acc_main_on}] to [{acc_main_on}]")
     finally:
       self._mads_states_cleanup()
 
