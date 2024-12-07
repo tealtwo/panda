@@ -8,10 +8,10 @@ typedef enum __attribute__((packed)) {
 } ButtonState;
 
 typedef enum __attribute__((packed)) {
-  MADS_BUTTON_TRANSITION_NO_CHANGE = 0,
-  MADS_BUTTON_TRANSITION_TO_PRESSED = 1,
-  MADS_BUTTON_TRANSITION_TO_RELEASED = 2
-} ButtonTransition;
+  MADS_TRANSITION_NO_CHANGE = 0,
+  MADS_TRANSITION_TO_ACTIVE = 1,
+  MADS_TRANSITION_TO_INACTIVE = 2
+} StateTransition;
 
 typedef enum __attribute__((packed)) {
   MADS_DISENGAGE_REASON_NONE = 0,
@@ -56,7 +56,7 @@ ButtonState lkas_button_press = MADS_BUTTON_UNAVAILABLE;
 typedef struct {
   const ButtonState *current;
   ButtonState last;
-  ButtonTransition transition;
+  StateTransition transition;
   uint32_t press_timestamp;
   // bool is_engaged : 1;
 } ButtonStateTracking;
@@ -116,16 +116,16 @@ static bool m_can_allow_controls_lat(void) {
   return result;
 }
 
-// Determine button transition
-static ButtonTransition m_get_button_transition(bool current, bool last) {
-  ButtonTransition result = MADS_BUTTON_TRANSITION_NO_CHANGE;
+// Handles binary state transitions
+static StateTransition m_get_binary_transition(bool is_active, bool was_active) {
+  StateTransition result;
 
-  if (current && !last) {
-    result = MADS_BUTTON_TRANSITION_TO_PRESSED;
-  } else if (!current && last) {
-    result = MADS_BUTTON_TRANSITION_TO_RELEASED;
+  if (is_active && !was_active) {
+    result = MADS_TRANSITION_TO_ACTIVE;
+  } else if (!is_active && was_active) {
+    result = MADS_TRANSITION_TO_INACTIVE;
   } else {
-    result = MADS_BUTTON_TRANSITION_NO_CHANGE;
+    result = MADS_TRANSITION_NO_CHANGE;
   }
 
   return result;
@@ -144,12 +144,12 @@ static void m_mads_state_init(void) {
 
   // Button state initialization
   m_mads_state.main_button.last = MADS_BUTTON_UNAVAILABLE;
-  m_mads_state.main_button.transition = MADS_BUTTON_TRANSITION_NO_CHANGE;
+  m_mads_state.main_button.transition = MADS_TRANSITION_NO_CHANGE;
   m_mads_state.main_button.press_timestamp = 0;
   // m_mads_state.main_button.is_engaged = false;
 
   m_mads_state.lkas_button.last = MADS_BUTTON_UNAVAILABLE;
-  m_mads_state.lkas_button.transition = MADS_BUTTON_TRANSITION_NO_CHANGE;
+  m_mads_state.lkas_button.transition = MADS_TRANSITION_NO_CHANGE;
   m_mads_state.lkas_button.press_timestamp = 0;
   // m_mads_state.lkas_button.is_engaged = false;
 
@@ -208,12 +208,12 @@ static void m_mads_check_braking(bool is_braking) {
 static void m_update_button_state(ButtonStateTracking *button_state, const ButtonState *button_press) {
   if (*button_press != MADS_BUTTON_UNAVAILABLE) {
     button_state->current = button_press;
-    button_state->transition = m_get_button_transition(
+    button_state->transition = m_get_binary_transition(
         *button_state->current == MADS_BUTTON_PRESSED,
         button_state->last == MADS_BUTTON_PRESSED
     );
 
-    if (button_state->transition == MADS_BUTTON_TRANSITION_TO_PRESSED) {
+    if (button_state->transition == MADS_TRANSITION_TO_ACTIVE) {
       // Toggle the controls_requested_lat state
       m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat;
       if (!m_mads_state.controls_requested_lat) {
@@ -223,6 +223,21 @@ static void m_update_button_state(ButtonStateTracking *button_state, const Butto
 
     button_state->last = *button_state->current;
   }
+}
+
+static void m_update_acc_main_state(void) {
+  StateTransition transition = m_get_binary_transition(
+      *m_mads_state.acc_main.current,
+      m_mads_state.acc_main.previous
+  );
+
+  if (transition == MADS_TRANSITION_TO_ACTIVE) {
+    m_mads_state.controls_requested_lat = true;
+  } else if (transition == MADS_TRANSITION_TO_INACTIVE) {
+    mads_exit_controls(MADS_DISENGAGE_REASON_ACC_MAIN_OFF);
+  }
+  
+  m_mads_state.acc_main.previous = *m_mads_state.acc_main.current;
 }
 
 // Update state based on input conditions
@@ -247,18 +262,7 @@ inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_
   // Update button states - this will call mads_exit_controls if needed
   m_update_button_state(&m_mads_state.main_button, &main_button_press);
   m_update_button_state(&m_mads_state.lkas_button, &lkas_button_press);
-
-  bool acc_main_went_on = !m_mads_state.acc_main.previous && *m_mads_state.acc_main.current;
-  if (acc_main_went_on) {
-    // because the acc_main_on signal just became true, we need to set the controls_requested_lat to true, regardless of the button presses.
-    m_mads_state.controls_requested_lat = acc_main_went_on;
-  }
-
-  //TODO-SP: need to also see when acc_main_on was never on but the main button was the one who triggered the engage, in which case we should behave the same as if acc_main_on was on
-  bool acc_main_went_off = m_mads_state.acc_main.previous && !*m_mads_state.acc_main.current;
-  if (acc_main_went_off) {
-    mads_exit_controls(MADS_DISENGAGE_REASON_ACC_MAIN_OFF);
-  }
+  m_update_acc_main_state();
 
   // Update cruise engagement state
   m_mads_state.cruise_engaged = cruise_engaged;
@@ -268,9 +272,6 @@ inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_
 
   // Try to allow controls if requested
   m_mads_try_allow_controls_lat();
-
-  // Update previous acc_main state
-  m_mads_state.acc_main.previous = *m_mads_state.acc_main.current;
 }
 
 // Global system enable/disable
