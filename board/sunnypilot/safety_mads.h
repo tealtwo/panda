@@ -4,21 +4,18 @@
 // Type Definitions and Enums
 // ===============================
 
-// Button state enumeration
 typedef enum __attribute__((packed)) {
   MADS_BUTTON_UNAVAILABLE = -1,
   MADS_BUTTON_NOT_PRESSED = 0,
   MADS_BUTTON_PRESSED = 1
 } ButtonState;
 
-// State transition enumeration
 typedef enum __attribute__((packed)) {
   MADS_EDGE_NO_CHANGE = 0,
   MADS_EDGE_RISING = 1,
   MADS_EDGE_FALLING = 2
 } EdgeTransition;
 
-// Disengage reason enumeration
 typedef enum __attribute__((packed)) {
   MADS_DISENGAGE_REASON_NONE = 0,
   MADS_DISENGAGE_REASON_BRAKE = 1,
@@ -44,14 +41,12 @@ typedef enum __attribute__((packed)) {
 // Data Structures
 // ===============================
 
-// Structure to track disengagement state
 typedef struct {
   DisengageReason reason;
   bool can_auto_resume;
   uint32_t timestamp;
 } DisengageState;
 
-// Button state tracking structure
 typedef struct {
   const ButtonState *current;
   ButtonState last;
@@ -60,7 +55,6 @@ typedef struct {
   void (*handle_press)(void);
 } ButtonStateTracking;
 
-// ACC state structure
 typedef struct {
   const bool *current; 
   bool previous : 1;
@@ -69,7 +63,6 @@ typedef struct {
   void (*handle_falling_edge)(void);
 } BinaryStateTracking;
 
-// Main MADS state structure
 typedef struct {
   uint32_t state_flags;
   const bool *is_vehicle_moving_ptr;
@@ -102,23 +95,14 @@ ButtonState lkas_button_press = MADS_BUTTON_UNAVAILABLE;
 static MADSState m_mads_state;
 
 // ===============================
-// Function Declarations
+// External Function Declarations (kept as needed)
 // ===============================
 
-// Core system functions
 extern const MADSState* get_mads_state(void);
 extern void mads_set_system_state(bool enabled, bool disengage_lateral_on_brake);
 extern void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_main, bool is_braking, bool cruise_engaged);
 extern void mads_exit_controls(DisengageReason reason);
 extern bool mads_is_lateral_control_allowed_by_mads(void);
-
-// Internal helper functions
-static void m_mads_state_init(void);
-static bool m_can_allow_controls_lat(void);
-static void m_mads_check_braking(bool is_braking);
-static void m_update_button_state(ButtonStateTracking *state, const ButtonState *button_current);
-static void m_update_binary_state(BinaryStateTracking *state, const bool *current);
-static void m_mads_try_allow_controls_lat(void);
 
 // ===============================
 // Event Handlers
@@ -157,65 +141,6 @@ static EdgeTransition m_get_edge_transition(bool current, bool last) {
   return result;
 }
 
-// ===============================
-// Function Implementations
-// ===============================
-
-// Core system functions
-inline const MADSState* get_mads_state(void) {
-  return &m_mads_state;
-}
-
-inline void mads_set_system_state(bool enabled, bool disengage_lateral_on_brake) {
-  m_mads_state_init();
-  m_mads_state.system_enabled = enabled;
-  m_mads_state.disengage_lateral_on_brake = disengage_lateral_on_brake;
-}
-
-inline void mads_exit_controls(DisengageReason reason) {
-  if (reason == MADS_DISENGAGE_REASON_ACC_MAIN_OFF) {
-    m_mads_state.controls_requested_lat = false;
-  }
-  
-  if (m_mads_state.controls_allowed_lat) {
-    m_mads_state.previous_disengage = m_mads_state.current_disengage;
-    m_mads_state.current_disengage.reason = reason;
-    m_mads_state.current_disengage.timestamp = microsecond_timer_get();
-    m_mads_state.controls_allowed_lat = false;
-  }
-}
-
-inline bool mads_is_lateral_control_allowed_by_mads(void) {
-  return m_mads_state.system_enabled && m_mads_state.controls_allowed_lat;
-}
-
-inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_main, bool is_braking, bool cruise_engaged) {
-  if (m_mads_state.is_vehicle_moving_ptr == NULL) {
-    m_mads_state.is_vehicle_moving_ptr = op_vehicle_moving;
-  }
-
-  if (m_mads_state.acc_main.current == NULL) {
-    m_mads_state.acc_main.current = op_acc_main;
-  }
-
-  if (!(m_mads_state.state_flags & MADS_STATE_FLAG_MAIN_BUTTON_AVAILABLE) && (main_button_press != MADS_BUTTON_UNAVAILABLE)) {
-    m_mads_state.state_flags |= MADS_STATE_FLAG_MAIN_BUTTON_AVAILABLE;
-  }
-
-  if (!(m_mads_state.state_flags & MADS_STATE_FLAG_LKAS_BUTTON_AVAILABLE) && (lkas_button_press != MADS_BUTTON_UNAVAILABLE)) {
-    m_mads_state.state_flags |= MADS_STATE_FLAG_LKAS_BUTTON_AVAILABLE;
-  }
-
-  m_update_button_state(&m_mads_state.main_button, &main_button_press);
-  m_update_button_state(&m_mads_state.lkas_button, &lkas_button_press);
-  m_update_binary_state(&m_mads_state.acc_main, op_acc_main);
-
-  m_mads_state.cruise_engaged = cruise_engaged;
-  m_mads_check_braking(is_braking);
-  m_mads_try_allow_controls_lat();
-}
-
-// Internal helper functions
 static void m_mads_state_init(void) {
   m_mads_state.is_vehicle_moving_ptr = NULL;
   m_mads_state.acc_main.current = NULL;
@@ -319,4 +244,61 @@ static void m_mads_try_allow_controls_lat(void) {
     m_mads_state.previous_disengage = m_mads_state.current_disengage;
     m_mads_state.current_disengage.reason = MADS_DISENGAGE_REASON_NONE;
   }
+}
+
+// ===============================
+// Function Implementations
+// ===============================
+
+inline const MADSState* get_mads_state(void) {
+  return &m_mads_state;
+}
+
+inline void mads_set_system_state(bool enabled, bool disengage_lateral_on_brake) {
+  m_mads_state_init();
+  m_mads_state.system_enabled = enabled;
+  m_mads_state.disengage_lateral_on_brake = disengage_lateral_on_brake;
+}
+
+inline void mads_exit_controls(DisengageReason reason) {
+  if (reason == MADS_DISENGAGE_REASON_ACC_MAIN_OFF) {
+    m_mads_state.controls_requested_lat = false;
+  }
+  
+  if (m_mads_state.controls_allowed_lat) {
+    m_mads_state.previous_disengage = m_mads_state.current_disengage;
+    m_mads_state.current_disengage.reason = reason;
+    m_mads_state.current_disengage.timestamp = microsecond_timer_get();
+    m_mads_state.controls_allowed_lat = false;
+  }
+}
+
+inline bool mads_is_lateral_control_allowed_by_mads(void) {
+  return m_mads_state.system_enabled && m_mads_state.controls_allowed_lat;
+}
+
+inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_main, bool is_braking, bool cruise_engaged) {
+  if (m_mads_state.is_vehicle_moving_ptr == NULL) {
+    m_mads_state.is_vehicle_moving_ptr = op_vehicle_moving;
+  }
+
+  if (m_mads_state.acc_main.current == NULL) {
+    m_mads_state.acc_main.current = op_acc_main;
+  }
+
+  if (!(m_mads_state.state_flags & MADS_STATE_FLAG_MAIN_BUTTON_AVAILABLE) && (main_button_press != MADS_BUTTON_UNAVAILABLE)) {
+    m_mads_state.state_flags |= MADS_STATE_FLAG_MAIN_BUTTON_AVAILABLE;
+  }
+
+  if (!(m_mads_state.state_flags & MADS_STATE_FLAG_LKAS_BUTTON_AVAILABLE) && (lkas_button_press != MADS_BUTTON_UNAVAILABLE)) {
+    m_mads_state.state_flags |= MADS_STATE_FLAG_LKAS_BUTTON_AVAILABLE;
+  }
+
+  m_update_button_state(&m_mads_state.main_button, &main_button_press);
+  m_update_button_state(&m_mads_state.lkas_button, &lkas_button_press);
+  m_update_binary_state(&m_mads_state.acc_main, op_acc_main);
+
+  m_mads_state.cruise_engaged = cruise_engaged;
+  m_mads_check_braking(is_braking);
+  m_mads_try_allow_controls_lat();
 }
