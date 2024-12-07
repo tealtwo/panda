@@ -146,6 +146,18 @@ class MadsCommonBase(unittest.TestCase):
     finally:
       self._mads_states_cleanup()
 
+  def test_controls_requested_lat_from_acc_main_on(self):
+    try:
+      self.safety.set_acc_main_on(True)
+      self._rx(self._speed_msg(0))
+      self.assertTrue(self.safety.get_controls_requested_lat())
+
+      self.safety.set_acc_main_on(False)
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_controls_requested_lat())
+    finally:
+      self._mads_states_cleanup()
+
   def test_controls_allowed_must_always_enable_lat(self):
     try:
       for mads_enabled in [True, False]:
