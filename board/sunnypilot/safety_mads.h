@@ -13,10 +13,10 @@ typedef enum __attribute__((packed)) {
 
 // State transition enumeration
 typedef enum __attribute__((packed)) {
-  MADS_TRANSITION_NO_CHANGE = 0,
-  MADS_TRANSITION_TO_ACTIVE = 1,
-  MADS_TRANSITION_TO_INACTIVE = 2
-} StateTransition;
+  MADS_EDGE_NO_CHANGE = 0,
+  MADS_EDGE_RISING = 1,
+  MADS_EDGE_FALLING = 2
+} EdgeTransition;
 
 // Disengage reason enumeration
 typedef enum __attribute__((packed)) {
@@ -55,17 +55,19 @@ typedef struct {
 typedef struct {
   const ButtonState *current;
   ButtonState last;
-  StateTransition transition;
+  EdgeTransition transition;
   uint32_t press_timestamp;
+  void (*handle_press)(void);
 } ButtonStateTracking;
 
 // ACC state structure
 typedef struct {
-  const bool *current;
+  const bool *current; 
   bool previous : 1;
-  uint16_t mismatch_count;
-  uint16_t mismatch_threshold;
-} ACCState;
+  EdgeTransition transition;
+  void (*handle_rising_edge)(void);
+  void (*handle_falling_edge)(void);
+} BinaryStateTracking;
 
 // Main MADS state structure
 typedef struct {
@@ -74,7 +76,7 @@ typedef struct {
   
   ButtonStateTracking main_button;
   ButtonStateTracking lkas_button;
-  ACCState acc_main;
+  BinaryStateTracking acc_main;
   
   DisengageState current_disengage;
   DisengageState previous_disengage;
@@ -113,11 +115,47 @@ extern bool mads_is_lateral_control_allowed_by_mads(void);
 // Internal helper functions
 static void m_mads_state_init(void);
 static bool m_can_allow_controls_lat(void);
-static StateTransition m_get_binary_transition(bool is_active, bool was_active);
 static void m_mads_check_braking(bool is_braking);
-static void m_update_button_state(ButtonStateTracking *button_state, const ButtonState *button_press);
-static void m_update_acc_main_state(void);
+static void m_update_button_state(ButtonStateTracking *state, const ButtonState *button_current);
+static void m_update_binary_state(BinaryStateTracking *state, const bool *current);
 static void m_mads_try_allow_controls_lat(void);
+
+// ===============================
+// Event Handlers
+// ===============================
+
+static void handle_button_press(void) {
+  m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat;
+  if (!m_mads_state.controls_requested_lat) {
+    mads_exit_controls(MADS_DISENGAGE_REASON_BUTTON);
+  }
+}
+
+static void handle_acc_main_rising_edge(void) {
+  m_mads_state.controls_requested_lat = true;
+}
+
+static void handle_acc_main_falling_edge(void) {
+  mads_exit_controls(MADS_DISENGAGE_REASON_ACC_MAIN_OFF);
+}
+
+// ===============================
+// State Update Helpers
+// ===============================
+
+static EdgeTransition m_get_edge_transition(bool current, bool last) {
+  EdgeTransition result;
+
+  if (current && !last) {
+    result = MADS_EDGE_RISING;
+  } else if (!current && last) {
+    result = MADS_EDGE_FALLING;
+  } else {
+    result = MADS_EDGE_NO_CHANGE;
+  }
+
+  return result;
+}
 
 // ===============================
 // Function Implementations
@@ -170,7 +208,7 @@ inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_
 
   m_update_button_state(&m_mads_state.main_button, &main_button_press);
   m_update_button_state(&m_mads_state.lkas_button, &lkas_button_press);
-  m_update_acc_main_state();
+  m_update_binary_state(&m_mads_state.acc_main, op_acc_main);
 
   m_mads_state.cruise_engaged = cruise_engaged;
   m_mads_check_braking(is_braking);
@@ -189,16 +227,18 @@ static void m_mads_state_init(void) {
   m_mads_state.disengage_lateral_on_brake = true;
 
   m_mads_state.main_button.last = MADS_BUTTON_UNAVAILABLE;
-  m_mads_state.main_button.transition = MADS_TRANSITION_NO_CHANGE;
+  m_mads_state.main_button.transition = MADS_EDGE_NO_CHANGE;
   m_mads_state.main_button.press_timestamp = 0;
+  m_mads_state.main_button.handle_press = handle_button_press;
 
   m_mads_state.lkas_button.last = MADS_BUTTON_UNAVAILABLE;
-  m_mads_state.lkas_button.transition = MADS_TRANSITION_NO_CHANGE;
+  m_mads_state.lkas_button.transition = MADS_EDGE_NO_CHANGE;
   m_mads_state.lkas_button.press_timestamp = 0;
+  m_mads_state.lkas_button.handle_press = handle_button_press;
 
   m_mads_state.acc_main.previous = false;
-  m_mads_state.acc_main.mismatch_count = 0;
-  m_mads_state.acc_main.mismatch_threshold = MISMATCH_DEFAULT_THRESHOLD;
+  m_mads_state.acc_main.handle_rising_edge = handle_acc_main_rising_edge;
+  m_mads_state.acc_main.handle_falling_edge = handle_acc_main_falling_edge;
 
   m_mads_state.current_disengage.reason = MADS_DISENGAGE_REASON_NONE;
   m_mads_state.current_disengage.can_auto_resume = false;
@@ -230,16 +270,6 @@ static bool m_can_allow_controls_lat(void) {
   return result;
 }
 
-static StateTransition m_get_binary_transition(bool is_active, bool was_active) {
-  if (is_active && !was_active) {
-    return MADS_TRANSITION_TO_ACTIVE;
-  }
-  if (!is_active && was_active) {
-    return MADS_TRANSITION_TO_INACTIVE;
-  }
-  return MADS_TRANSITION_NO_CHANGE;
-}
-
 static void m_mads_check_braking(bool is_braking) {
   bool was_braking = m_mads_state.is_braking;
   if (is_braking && (!was_braking || *m_mads_state.is_vehicle_moving_ptr) && m_mads_state.disengage_lateral_on_brake) {
@@ -249,15 +279,15 @@ static void m_mads_check_braking(bool is_braking) {
   m_mads_state.is_braking = is_braking;
 }
 
-static void m_update_button_state(ButtonStateTracking *button_state, const ButtonState *button_press) {
-  if (*button_press != MADS_BUTTON_UNAVAILABLE) {
-    button_state->current = button_press;
-    button_state->transition = m_get_binary_transition(
+static void m_update_button_state(ButtonStateTracking *button_state, const ButtonState *button_current) {
+  button_state->current = button_current;
+  if (*button_state->current != MADS_BUTTON_UNAVAILABLE) {
+    button_state->transition = m_get_edge_transition(
         *button_state->current == MADS_BUTTON_PRESSED,
         button_state->last == MADS_BUTTON_PRESSED
     );
 
-    if (button_state->transition == MADS_TRANSITION_TO_ACTIVE) {
+    if (button_state->transition == MADS_EDGE_RISING) {
       m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat;
       if (!m_mads_state.controls_requested_lat) {
         mads_exit_controls(MADS_DISENGAGE_REASON_BUTTON);
@@ -268,19 +298,19 @@ static void m_update_button_state(ButtonStateTracking *button_state, const Butto
   }
 }
 
-static void m_update_acc_main_state(void) {
-  StateTransition transition = m_get_binary_transition(
-      *m_mads_state.acc_main.current,
-      m_mads_state.acc_main.previous
-  );
-
-  if (transition == MADS_TRANSITION_TO_ACTIVE) {
-    m_mads_state.controls_requested_lat = true;
-  } else if (transition == MADS_TRANSITION_TO_INACTIVE) {
-    mads_exit_controls(MADS_DISENGAGE_REASON_ACC_MAIN_OFF);
+static void m_update_binary_state(BinaryStateTracking *state, const bool *current) {
+  state->current = current;
+  EdgeTransition transition = m_get_edge_transition(*state->current, state->previous);
+  
+  if (transition == MADS_EDGE_RISING) {
+    state->handle_rising_edge();
+  } else if (transition == MADS_EDGE_FALLING) {
+    state->handle_falling_edge();
+  } else {
+    // Do nothing
   }
   
-  m_mads_state.acc_main.previous = *m_mads_state.acc_main.current;
+  state->previous = *state->current;
 }
 
 static void m_mads_try_allow_controls_lat(void) {
