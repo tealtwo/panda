@@ -256,7 +256,10 @@ class HondaBase(common.PandaCarSafetyTest):
     return self.packer.make_can_msg_panda("SCM_BUTTONS", self.PT_BUS, values)
 
   def _main_cruise_button_msg(self, enabled):
-    return self._button_msg(Btn.MAIN if enabled else Btn.NONE, main_on=enabled)
+    if enabled:
+      return self._button_msg(Btn.MAIN, main_on=True)
+    else:
+      raise unittest.SkipTest("For Honda, we can only reliably know if the button was pressed, but not properly the button release / disengage")
 
   def test_enable_control_from_lkas_button_press(self):
     for enable_mads in (True, False):

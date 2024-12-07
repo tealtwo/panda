@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
 import argparse
 import os
-from collections import Counter
+from collections import Counter, defaultdict
 
 from panda.tests.libpanda import libpanda_py
 from panda.tests.safety_replay.helpers import package_can_msg, init_segment
+
+# Define debug variables and their getter methods
+DEBUG_VARS = {
+  'lat_active': lambda safety: safety.get_lat_active(),
+  'controls_requested_lat': lambda safety: safety.get_controls_requested_lat(),
+  'controls_allowed_lat': lambda safety: safety.get_controls_allowed_lat(),
+  'current_disengage_reason': lambda safety: safety.mads_get_current_disengage_reason(),
+  'previous_disengage_reason': lambda safety: safety.mads_get_previous_disengage_reason(),
+  'stock_acc_main': lambda safety: safety.get_acc_main_on(),
+}
 
 # replay a drive to check for safety violations
 def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
@@ -24,6 +34,12 @@ def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
   blocked_addrs = Counter()
   invalid_addrs = set()
 
+  # Track last good state for each address
+  last_good_states = defaultdict(lambda: {
+    'timestamp': None,
+    **{var: None for var in DEBUG_VARS}
+  })
+
   can_msgs = [m for m in lr if m.which() in ('can', 'sendcan')]
   start_t = can_msgs[0].logMonoTime
   end_t = can_msgs[-1].logMonoTime
@@ -39,6 +55,14 @@ def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
       for canmsg in msg.sendcan:
         to_send = package_can_msg(canmsg)
         sent = safety.safety_tx_hook(to_send)
+
+        # Update last good state if message is allowed
+        if sent:
+          last_good_states[canmsg.address].update({
+            'timestamp': (msg.logMonoTime - start_t) / 1e9,
+            **{var: getter(safety) for var, getter in DEBUG_VARS.items()}
+          })
+
         if not sent:
           tx_blocked += 1
           tx_controls_blocked += safety.get_controls_allowed()
@@ -46,12 +70,26 @@ def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
           blocked_addrs[canmsg.address] += 1
 
           if "DEBUG" in os.environ:
-            print(f"blocked bus {canmsg.src} msg {hex(canmsg.address)} at {(msg.logMonoTime - start_t) / 1e9}|\t" +
-                  f"lat [{safety.get_lat_active()}]|\t" +
-                  f"req [{safety.get_controls_requested_lat()}]|\t" +
-                  f"alwd [{safety.get_controls_allowed_lat()}]|\t" +
-                  f"cur_dis_r [{safety.mads_get_current_disengage_reason()}]|\t" +
-                  f"prev_dis_r [{safety.mads_get_previous_disengage_reason()}]|\t")
+            last_good = last_good_states[canmsg.address]
+            print(f"\nBlocked message at {(msg.logMonoTime - start_t) / 1e9:.3f}s:")
+            print(f"Address: {hex(canmsg.address)} (bus {canmsg.src})")
+            print("Current state:")
+            for var, getter in DEBUG_VARS.items():
+              print(f"  {var}: {getter(safety)}")
+
+            if last_good['timestamp'] is not None:
+              print(f"\nLast good state ({last_good['timestamp']:.3f}s):")
+              for var in DEBUG_VARS:
+                print(f"  {var}: {last_good[var]}")
+            else:
+              print("\nNo previous good state found for this address")
+            print("-" * 80)
+        else:  # Update last good state if message is allowed
+          last_good_states[canmsg.address].update({
+            'timestamp': (msg.logMonoTime - start_t) / 1e9,
+            **{var: getter(safety) for var, getter in DEBUG_VARS.items()}
+          })
+
         tx_controls += safety.get_controls_allowed()
         tx_controls_lat += safety.get_controls_allowed_lat()
         tx_tot += 1
