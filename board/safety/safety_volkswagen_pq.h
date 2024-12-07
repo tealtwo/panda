@@ -36,7 +36,7 @@ const LongitudinalLimits VOLKSWAGEN_PQ_LONG_LIMITS = {
 
 // Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
 const CanMsg VOLKSWAGEN_PQ_STOCK_TX_MSGS[] = {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8},
-                                              {MSG_GRA_NEU, 0, 4}, {MSG_GRA_NEU, 2, 4},
+                                              {MSG_GRA_NEU, 0, 4}, {MSG_GRA_NEU, 2, 4}, {MSG_ACC_GRA_ANZEIGE, 0, 8},
                                               {MSG_ACC_SYSTEM, 0, 8}, {MSG_MOTOR_2, 2, 8}, {MSG_EPB_1, 1, 8},
                                               {MSG_EPB_1, 2, 8}, {MSG_BREMSE_8, 2, 8}, {MSG_BREMSE_11, 2, 8}};
 const CanMsg VOLKSWAGEN_PQ_LONG_TX_MSGS[] =  {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8},
@@ -247,7 +247,7 @@ static int volkswagen_pq_fwd_hook(int bus_num, int addr) {
       }
       break;
     case 2:
-      if ((addr == MSG_HCA_1) || (addr == MSG_LDW_1) || (addr == MSG_ACC_SYSTEM)) {
+      if ((addr == MSG_HCA_1) || (addr == MSG_LDW_1) || (addr == MSG_ACC_SYSTEM) || (addr == MSG_ACC_GRA_ANZEIGE)) {
         // openpilot takes over LKAS steering control and related HUD messages from the camera
         bus_fwd = -1;
       } else if (volkswagen_longitudinal && ((addr == MSG_ACC_SYSTEM) || (addr == MSG_ACC_GRA_ANZEIGE))) {
