@@ -17,7 +17,8 @@ typedef enum __attribute__((packed)) {
   MADS_DISENGAGE_REASON_NONE = 0,
   MADS_DISENGAGE_REASON_BRAKE = 1,
   MADS_DISENGAGE_REASON_LAG = 2,
-  MADS_DISENGAGE_REASON_BUTTON = 3
+  MADS_DISENGAGE_REASON_BUTTON = 3,
+  MADS_DISENGAGE_REASON_ACC_MAIN_OFF = 4
 } DisengageReason;
 
 // Structure to track disengagement state
@@ -57,7 +58,7 @@ typedef struct {
   ButtonState last;
   ButtonTransition transition;
   uint32_t press_timestamp;
-  bool is_engaged : 1;
+  // bool is_engaged : 1;
 } ButtonStateTracking;
 
 // Optimized ACC state structure
@@ -173,6 +174,11 @@ static void m_mads_state_init(void) {
 // Exit lateral controls
 extern void mads_exit_controls(DisengageReason reason);
 inline void mads_exit_controls(DisengageReason reason) {
+  // If acc_main_off went off, we stop any "request" to engage lateral controls
+  if (reason == MADS_DISENGAGE_REASON_ACC_MAIN_OFF) {
+    m_mads_state.controls_requested_lat = false;
+  }
+  
   if (m_mads_state.controls_allowed_lat) {
     m_mads_state.previous_disengage = m_mads_state.current_disengage;
     m_mads_state.current_disengage.reason = reason;
@@ -209,7 +215,7 @@ static void m_update_button_state(ButtonStateTracking *button_state, const Butto
 
     if (button_state->transition == MADS_BUTTON_TRANSITION_TO_PRESSED) {
       // Toggle the controls_requested_lat state
-      m_mads_state.controls_requested_lat = !m_mads_state.controls_requested_lat;
+      m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat;
       if (!m_mads_state.controls_requested_lat) {
         mads_exit_controls(MADS_DISENGAGE_REASON_BUTTON);
       }
@@ -238,23 +244,32 @@ inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_
     m_mads_state.state_flags |= MADS_STATE_FLAG_LKAS_BUTTON_AVAILABLE;
   }
 
+  // Update button states - this will call mads_exit_controls if needed
   m_update_button_state(&m_mads_state.main_button, &main_button_press);
   m_update_button_state(&m_mads_state.lkas_button, &lkas_button_press);
 
-  // Update other states
+  bool acc_main_went_on = !m_mads_state.acc_main.previous && *m_mads_state.acc_main.current;
+  if (acc_main_went_on) {
+    // because the acc_main_on signal just became true, we need to set the controls_requested_lat to true, regardless of the button presses.
+    m_mads_state.controls_requested_lat = acc_main_went_on;
+  }
+
+  //TODO-SP: need to also see when acc_main_on was never on but the main button was the one who triggered the engage, in which case we should behave the same as if acc_main_on was on
+  bool acc_main_went_off = m_mads_state.acc_main.previous && !*m_mads_state.acc_main.current;
+  if (acc_main_went_off) {
+    mads_exit_controls(MADS_DISENGAGE_REASON_ACC_MAIN_OFF);
+  }
+
+  // Update cruise engagement state
   m_mads_state.cruise_engaged = cruise_engaged;
 
-  //TODO-SP: Validate the acc_main, does it go to true when long is controlled? or when?
-  // Use engagement state for lateral control
-  m_mads_state.controls_requested_lat = m_mads_state.controls_requested_lat || *m_mads_state.acc_main.current;
-
-  // Check ACC main state and braking conditions
+  // Check braking conditions
   m_mads_check_braking(is_braking);
 
-  // If controls are requested and currently disabled, check if we can enable
+  // Try to allow controls if requested
   m_mads_try_allow_controls_lat();
 
-  // Update ACC main state
+  // Update previous acc_main state
   m_mads_state.acc_main.previous = *m_mads_state.acc_main.current;
 }
 
