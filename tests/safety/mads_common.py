@@ -300,6 +300,33 @@ class MadsCommonBase(unittest.TestCase):
     finally:
       self._mads_states_cleanup()
 
+  def test_lkas_button_press_with_acc_main_on(self):
+    """Test that LKAS/LFA button presses don't disengage controls when ACC main is on"""
+    try:
+      self._lkas_button_msg(False)
+    except NotImplementedError:
+      raise unittest.SkipTest("Skipping test because LKAS button not supported")
+
+    try:
+      self._mads_states_cleanup()
+      self.safety.set_enable_mads(True, False)
+      self.safety.set_acc_main_on(True)
+
+      # Enable controls initially with LKAS button
+      self._rx(self._lkas_button_msg(True))
+      self._rx(self._lkas_button_msg(False))
+      self.assertTrue(self.safety.get_controls_allowed_lat())
+
+      # Test LKAS button press while ACC main is on
+      self._rx(self._lkas_button_msg(True))
+      self._rx(self._lkas_button_msg(False))
+
+      # Controls should still be allowed
+      self.assertTrue(self.safety.get_controls_allowed_lat(),
+                      "Controls should remain enabled with LKAS button press while ACC main is on")
+    finally:
+      self._mads_states_cleanup()
+
   def test_enable_and_disable_lateral_control_with_cruise_button_only(self):
     """Test Scenario 1: Car with only cruise button, toggle MADS with cruise button"""
     try:
