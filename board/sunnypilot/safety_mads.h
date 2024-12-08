@@ -91,7 +91,7 @@ static void m_update_button_state(ButtonStateTracking *button_state) {
     );
 
     if (button_state->transition == MADS_EDGE_RISING) {
-      m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat;
+      m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat || *m_mads_state.acc_main.current;
       if (!m_mads_state.controls_requested_lat) {
         mads_exit_controls(MADS_DISENGAGE_REASON_BUTTON);
       }
