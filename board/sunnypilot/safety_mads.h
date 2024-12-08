@@ -91,10 +91,10 @@ static void m_update_button_state(ButtonStateTracking *button_state) {
     );
 
     if (button_state->transition == MADS_EDGE_RISING) {
-      const bool acc_active = *m_mads_state.acc_main.current;
+      const bool acc_main_enabled = *m_mads_state.acc_main.current;
       m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat;
       
-      if (!m_mads_state.controls_requested_lat && !acc_active) {
+      if (!m_mads_state.controls_requested_lat && !acc_main_enabled) {
         mads_exit_controls(MADS_DISENGAGE_REASON_BUTTON);
       }
     }
