@@ -91,8 +91,10 @@ static void m_update_button_state(ButtonStateTracking *button_state) {
     );
 
     if (button_state->transition == MADS_EDGE_RISING) {
-      m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat || *m_mads_state.acc_main.current;
-      if (!m_mads_state.controls_requested_lat) {
+      const bool acc_active = *m_mads_state.acc_main.current;
+      m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat;
+      
+      if (!m_mads_state.controls_requested_lat && !acc_active) {
         mads_exit_controls(MADS_DISENGAGE_REASON_BUTTON);
       }
     }
@@ -106,6 +108,7 @@ static void m_update_binary_state(BinaryStateTracking *state) {
   if (transition == MADS_EDGE_RISING) {
     m_mads_state.controls_requested_lat = true;
   } else if (transition == MADS_EDGE_FALLING) {
+    m_mads_state.controls_requested_lat = false;
     mads_exit_controls(MADS_DISENGAGE_REASON_ACC_MAIN_OFF);
   } else {
     // Do nothing
@@ -137,10 +140,6 @@ inline void mads_set_system_state(bool enabled, bool disengage_lateral_on_brake)
 }
 
 inline void mads_exit_controls(DisengageReason reason) {
-  if (reason == MADS_DISENGAGE_REASON_ACC_MAIN_OFF) {
-    m_mads_state.controls_requested_lat = false;
-  }
-
   if (m_mads_state.controls_allowed_lat) {
     m_mads_state.previous_disengage = m_mads_state.current_disengage;
     m_mads_state.current_disengage.reason = reason;
