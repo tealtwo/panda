@@ -245,11 +245,11 @@ void set_controls_allowed_lat(bool c){
   m_mads_state.controls_allowed_lat = c;
 }
 
-int get_mads_acc_main(void){
+bool get_mads_acc_main(void){
   return *m_mads_state.acc_main.current;
 }
 
-int get_mads_acc_main_prev(void){
+bool get_mads_acc_main_prev(void){
     return m_mads_state.acc_main.previous;
 }
 

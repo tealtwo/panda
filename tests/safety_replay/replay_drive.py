@@ -9,11 +9,13 @@ from panda.tests.safety_replay.helpers import package_can_msg, init_segment
 # Define debug variables and their getter methods
 DEBUG_VARS = {
   'lat_active': lambda safety: safety.get_lat_active(),
+  'controls_allowed': lambda safety: safety.get_controls_allowed(),
   'controls_requested_lat': lambda safety: safety.get_controls_requested_lat(),
   'controls_allowed_lat': lambda safety: safety.get_controls_allowed_lat(),
   'current_disengage_reason': lambda safety: safety.mads_get_current_disengage_reason(),
   'previous_disengage_reason': lambda safety: safety.mads_get_previous_disengage_reason(),
   'stock_acc_main': lambda safety: safety.get_acc_main_on(),
+  'mads_acc_main': lambda safety: safety.get_mads_acc_main(),
 }
 
 # replay a drive to check for safety violations
@@ -29,7 +31,7 @@ def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
     init_segment(safety, lr, safety_mode, param)
     lr.reset()
 
-  rx_tot, rx_invalid, tx_tot, tx_blocked, tx_controls, tx_controls_lat, tx_controls_blocked, tx_controls_lat_blocked = 0, 0, 0, 0, 0, 0, 0, 0
+  rx_tot, rx_invalid, tx_tot, tx_blocked, tx_controls, tx_controls_lat, tx_controls_blocked, tx_controls_lat_blocked, mads_mismatch = 0, 0, 0, 0, 0, 0, 0, 0, 0
   safety_tick_rx_invalid = False
   blocked_addrs = Counter()
   invalid_addrs = set()
@@ -55,6 +57,14 @@ def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
       for canmsg in msg.sendcan:
         to_send = package_can_msg(canmsg)
         sent = safety.safety_tx_hook(to_send)
+
+        # mismatched
+        if (safety.get_controls_allowed() and not safety.get_controls_allowed_lat()):
+          mads_mismatch += 1
+          print(f"controls allowed but not controls allowed lat [{mads_mismatch}]")
+          print(f"msg:{canmsg.address} ({hex(canmsg.address)})")
+          for var, getter in DEBUG_VARS.items():
+            print(f"  {var}: {getter(safety)}")
 
         if not sent:
           tx_blocked += 1
