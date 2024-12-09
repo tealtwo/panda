@@ -96,8 +96,8 @@ static void m_update_button_state(ButtonStateTracking *button_state) {
 static void m_update_binary_state(BinaryStateTracking *state) {
   state->transition = m_get_edge_transition(*state->current, state->previous);
 
-  // Invoke only once to evaluate if PCM main cruise is available
-  if (state->transition != MADS_EDGE_NO_CHANGE) {
+  // Evaluate PCM main cruise availability only on rising/falling edges
+  if (state->transition == MADS_EDGE_RISING || state->transition == MADS_EDGE_FALLING) {
     state->available = true;
   }
 
