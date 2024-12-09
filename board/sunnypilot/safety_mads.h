@@ -35,7 +35,6 @@ static void m_mads_state_init(void) {
   m_mads_state.system_enabled = false;
   m_mads_state.disengage_lateral_on_brake = true;
 
-  m_mads_state.acc_main.available = false;
   m_mads_state.acc_main.previous = false;
   m_mads_state.acc_main.transition = MADS_EDGE_NO_CHANGE;
 
@@ -50,7 +49,6 @@ static void m_mads_state_init(void) {
   // m_mads_state.cruise_engaged = false;
   m_mads_state.controls_requested_lat = false;
   m_mads_state.controls_allowed_lat = false;
-  m_mads_state.acc_main_on_non_pcm = false;
 }
 
 static bool m_can_allow_controls_lat(void) {
@@ -95,12 +93,6 @@ static void m_update_button_state(ButtonStateTracking *button_state) {
 // PCM main cruise
 static void m_update_binary_state(BinaryStateTracking *state) {
   state->transition = m_get_edge_transition(*state->current, state->previous);
-
-  // Evaluate PCM main cruise availability only on rising/falling edges
-  if ((state->transition == MADS_EDGE_RISING) || (state->transition == MADS_EDGE_FALLING)) {
-    state->available = true;
-  }
-
   state->previous = *state->current;
 }
 
