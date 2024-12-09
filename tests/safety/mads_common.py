@@ -1,12 +1,5 @@
 import unittest
 from abc import abstractmethod
-from enum import IntFlag
-
-
-class MadsStates(IntFlag):
-  DEFAULT = 0
-  RESERVED = 1
-  LKAS_BUTTON_AVAILABLE = 2
 
 
 class MadsCommonBase(unittest.TestCase):
