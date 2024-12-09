@@ -61,7 +61,7 @@ class HyundaiButtonBase:
 
   def test_sampling_cruise_buttons(self):
     """
-      Test that we allow controls on recent button press, but not as button leaLongitudinalves sliding window
+      Test that we allow controls on recent button press, but not as button leaves sliding window
     """
     self._rx(self._button_msg(Buttons.SET))
     for i in range(2 * PREV_BUTTON_SAMPLES):

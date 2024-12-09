@@ -177,9 +177,16 @@ class MadsCommonBase(unittest.TestCase):
     finally:
       self._mads_states_cleanup()
 
-  def test_enable_lateral_control_with_lfa_and_disable_with_pcm_main_cruise(self) -> None:
-    """Test Scenario 4: PCM main cruise off -> PCM main cruise on -> LKAS button disengage ->
-                        LKAS button engage -> PCM main cruise off"""
+  def test_enable_lateral_control_with_lfa_and_disable_with_pcm_main_cruise(self):
+    """Tests PCM main cruise and LKAS button state transitions.
+
+      Sequence:
+      1. PCM main cruise off -> on
+      2. LKAS button disengage
+      3. LKAS button engage
+      4. PCM main cruise off
+
+    """
     try:
       self._lkas_button_msg(False)
     except NotImplementedError:
