@@ -298,11 +298,13 @@ class MadsCommonBase(unittest.TestCase):
       # Enable controls initially with LKAS button
       self._rx(self._lkas_button_msg(True))
       self._rx(self._lkas_button_msg(False))
+      self._rx(self._speed_msg(0))
       self.assertTrue(self.safety.get_controls_allowed_lat())
 
       # Test LKAS button press while ACC main is on
       self._rx(self._lkas_button_msg(True))
       self._rx(self._lkas_button_msg(False))
+      self._rx(self._speed_msg(0))
 
       # Controls should be disabled
       self.assertFalse(self.safety.get_controls_allowed_lat(),
@@ -358,6 +360,78 @@ class MadsCommonBase(unittest.TestCase):
       self.assertFalse(self.safety.get_controls_allowed_lat())
     finally:
       self._mads_states_cleanup()
+
+  def test_pcm_availability_flag_transitions(self):
+    """Test that PCM availability flag is properly set on state transitions"""
+    try:
+      self._mads_states_cleanup()
+
+      # Initially should not be available
+      self.assertFalse(self.safety.get_pcm_main_cruise_available())
+
+      # Set initial state to false
+      self.safety.set_acc_main_on(False)
+      self._rx(self._speed_msg(0))
+
+      # Transition to true should set available flag
+      self.safety.set_acc_main_on(True)
+      self._rx(self._speed_msg(0))
+      self.assertTrue(self.safety.get_pcm_main_cruise_available())
+
+      # Reset and verify transition from true to false also sets flag
+      self._mads_states_cleanup()
+      self.assertFalse(self.safety.get_pcm_main_cruise_available())
+
+      self.safety.set_acc_main_on(True)
+      self._rx(self._speed_msg(0))
+      self.safety.set_acc_main_on(False)
+      self._rx(self._speed_msg(0))
+      self.assertTrue(self.safety.get_pcm_main_cruise_available())
+    finally:
+      self._mads_states_cleanup()
+
+  def test_pcm_availability_flag_persistence(self):
+    """Test that PCM availability flag remains set after initial transition"""
+    try:
+      self._mads_states_cleanup()
+
+      # Initial transition to set flag
+      self.safety.set_acc_main_on(True)
+      self._rx(self._speed_msg(0))
+      self.assertTrue(self.safety.get_pcm_main_cruise_available())
+
+      # Multiple state changes should not clear the flag
+      for _ in range(3):
+        self.safety.set_acc_main_on(False)
+        self._rx(self._speed_msg(0))
+        self.assertTrue(self.safety.get_pcm_main_cruise_available())
+
+        self.safety.set_acc_main_on(True)
+        self._rx(self._speed_msg(0))
+        self.assertTrue(self.safety.get_pcm_main_cruise_available())
+    finally:
+      self._mads_states_cleanup()
+
+
+def test_pcm_availability_flag_no_change(self):
+  """Test that PCM availability flag is not set without state transitions"""
+  try:
+    self._mads_states_cleanup()
+
+    # Multiple updates with same state should not set flag
+    for _ in range(3):
+      self.safety.set_acc_main_on(False)
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_pcm_main_cruise_available())
+
+    # Same test with True state
+    self._mads_states_cleanup()
+    for _ in range(3):
+      self.safety.set_acc_main_on(True)
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_pcm_main_cruise_available())
+  finally:
+    self._mads_states_cleanup()
 
 
 class MadsCommonNonPCMBase(unittest.TestCase):
