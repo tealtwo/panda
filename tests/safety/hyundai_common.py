@@ -61,7 +61,7 @@ class HyundaiButtonBase:
 
   def test_sampling_cruise_buttons(self):
     """
-      Test that we allow controls on recent button press, but not as button leaves sliding window
+      Test that we allow controls on recent button press, but not as button leaLongitudinalves sliding window
     """
     self._rx(self._button_msg(Buttons.SET))
     for i in range(2 * PREV_BUTTON_SAMPLES):
@@ -106,6 +106,12 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
     raise NotImplementedError
+
+  def _acc_state_msg(self, enable):
+    raise NotImplementedError
+
+  def test_acc_main_state_from_stock_scc_message(self):
+    pass
 
   def test_set_resume_buttons(self):
     """
