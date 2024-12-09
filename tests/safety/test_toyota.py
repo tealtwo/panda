@@ -146,12 +146,13 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
   def test_enable_and_disable_lateral_control_with_lfa_button(self):
     raise unittest.SkipTest("For Toyota, we only use the LFA detection to allow lateral control, not to disable it")
 
-  def test_enable_lateral_control_with_lfa_and_disable_with_cruise(self):
-    raise unittest.SkipTest("For Toyota, we only use the LFA detection to allow lateral control, not to disable it")
+  def test_enable_lateral_control_with_lfa_and_disable_with_pcm_main_cruise(self):
+    raise unittest.SkipTest("For Toyota, it is not a button, but the LKAS icon."
+                            "The behavior is flaky, skip this test until we find a more reliable signal")
 
-  def test_lkas_button_press_with_acc_main_on(self):
-    raise unittest.SkipTest("For Toyota, we only use the LFA detection to allow lateral control, not to disable it")
-
+  def test_lkas_button_press_with_pcm_main_cruise(self):
+    raise unittest.SkipTest("For Toyota, it is not a button, but the LKAS icon."
+                            "The behavior is flaky, skip this test until we find a more reliable signal")
 
 class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
 
