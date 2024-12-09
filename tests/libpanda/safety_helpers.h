@@ -226,7 +226,7 @@ bool get_mads_acc_main(void){
 }
 
 bool get_mads_acc_main_prev(void){
-    return m_mads_state.acc_main.previous;
+  return m_mads_state.acc_main.previous;
 }
 
 int mads_get_current_disengage_reason(void) {

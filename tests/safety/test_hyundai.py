@@ -242,6 +242,10 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
     }
     return self.packer.make_can_msg_panda("FCA11", 0, values)
 
+  def _tx_acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
+    return self.packer.make_can_msg_panda("SCC11", 0, values)
+
   def test_no_aeb_fca11(self):
     self.assertTrue(self._tx(self._fca11_msg()))
     self.assertFalse(self._tx(self._fca11_msg(vsm_aeb_req=True)))
@@ -271,6 +275,10 @@ class TestHyundaiLongitudinalESCCSafety(HyundaiLongitudinalBase, TestHyundaiSafe
       "aReqValue": accel,
     }
     return self.packer.make_can_msg_panda("SCC12", self.SCC_BUS, values)
+
+  def _tx_acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
+    return self.packer.make_can_msg_panda("SCC11", 0, values)
 
   def test_tester_present_allowed(self):
     pass

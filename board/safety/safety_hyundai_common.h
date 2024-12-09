@@ -171,3 +171,7 @@ void hyundai_common_acc_main_on_sync(void) {
     acc_main_on_mismatches = 0U;
   }
 }
+
+uint32_t get_acc_main_on_mismatches(void) {
+  return acc_main_on_mismatches;
+}

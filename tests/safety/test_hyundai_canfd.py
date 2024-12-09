@@ -249,6 +249,10 @@ class TestHyundaiCanfdHDA2LongEV(HyundaiLongitudinalBase, TestHyundaiCanfdHDA2EV
     }
     return self.packer.make_can_msg_panda("SCC_CONTROL", 1, values)
 
+  def _tx_acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
+    return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
+
 
 # Tests HDA1 longitudinal for ICE, hybrid, EV
 @parameterized_class([
@@ -287,6 +291,10 @@ class TestHyundaiCanfdHDA1Long(HyundaiLongitudinalBase, TestHyundaiCanfdHDA1Base
       "aReqRaw": accel,
       "aReqValue": accel,
     }
+    return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
+
+  def _tx_acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
     return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
 
   # no knockout

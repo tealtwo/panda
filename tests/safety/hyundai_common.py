@@ -164,6 +164,85 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
         self._mads_states_cleanup()
 
+  def test_acc_main_sync_mismatches_reset(self):
+    """Test that acc_main_on_mismatches resets properly on rising edge of main button"""
+    for enable_mads in (True, False):
+      with self.subTest("enable_mads", mads_enabled=enable_mads):
+        self._mads_states_cleanup()
+        self.safety.set_enable_mads(enable_mads, False)
+
+        # Initial state
+        self._rx(self._main_cruise_button_msg(0))
+        self.assertFalse(self.safety.get_acc_main_on())
+
+        # Set up mismatch condition
+        self._rx(self._main_cruise_button_msg(1))  # Press button - acc_main_on = True
+        self._rx(self._main_cruise_button_msg(0))  # Release button
+        self._tx(self._tx_acc_state_msg(False))  # acc_main_on_tx = False
+        self.assertTrue(self.safety.get_acc_main_on())
+        self.assertEqual(1, self.safety.get_acc_main_on_mismatches())
+
+        # Rising edge of acc_main_on should reset
+        self._rx(self._main_cruise_button_msg(1))  # Press button again
+        self._rx(self._main_cruise_button_msg(0))  # Release button
+        self._tx(self._tx_acc_state_msg(False))  # acc_main_on_tx = False
+        self.assertFalse(self.safety.get_acc_main_on())
+        self.assertEqual(0, self.safety.get_acc_main_on_mismatches())
+    self._mads_states_cleanup()
+
+  def test_acc_main_sync_mismatch_counter(self):
+    """Test mismatch counter behavior and disengagement"""
+    for enable_mads in (True, False):
+      with self.subTest("enable_mads", mads_enabled=enable_mads):
+        self._mads_states_cleanup()
+        self.safety.set_enable_mads(enable_mads, False)
+        self.safety.set_controls_allowed_lat(True)
+
+        # Start with matched states
+        self._rx(self._main_cruise_button_msg(0))
+        self._tx(self._tx_acc_state_msg(False))
+        self.assertEqual(0, self.safety.get_acc_main_on_mismatches())
+
+        # Create mismatch by enabling acc_main_on
+        self._rx(self._main_cruise_button_msg(1))  # Press button
+        self._rx(self._main_cruise_button_msg(0))  # Release button
+        self._tx(self._tx_acc_state_msg(False))  # acc_main_on_tx stays false
+        self.assertTrue(self.safety.get_acc_main_on())
+        self.assertEqual(1, self.safety.get_acc_main_on_mismatches())
+
+        # Second mismatch
+        self._tx(self._tx_acc_state_msg(False))
+        self.assertTrue(self.safety.get_acc_main_on())
+        self.assertEqual(2, self.safety.get_acc_main_on_mismatches())
+
+        # Third mismatch should trigger disengagement
+        self._tx(self._tx_acc_state_msg(False))
+        self.assertFalse(self.safety.get_acc_main_on())
+        self.assertFalse(self.safety.get_controls_allowed_lat())
+        # Counter should reset after disengagement
+        self._tx(self._tx_acc_state_msg(False))
+        self.assertEqual(0, self.safety.get_acc_main_on_mismatches())
+
+    self._mads_states_cleanup()
+
+  def test_acc_main_sync_mismatch_recovery(self):
+    """Test that mismatch counter resets when states resync"""
+    for enable_mads in (True, False):
+      with self.subTest("enable_mads", mads_enabled=enable_mads):
+        self._mads_states_cleanup()
+        self.safety.set_enable_mads(enable_mads, False)
+
+        # Create initial mismatch
+        self._rx(self._main_cruise_button_msg(1))  # Press button
+        self._rx(self._main_cruise_button_msg(0))  # Release button
+        self._tx(self._tx_acc_state_msg(False))  # acc_main_on_tx = False
+        self.assertEqual(1, self.safety.get_acc_main_on_mismatches())
+
+        # Sync states
+        self._tx(self._tx_acc_state_msg(True))  # Match acc_main_on_tx to acc_main_on
+        self.assertEqual(0, self.safety.get_acc_main_on_mismatches())
+    self._mads_states_cleanup()
+
   def test_tester_present_allowed(self):
     """
       Ensure tester present diagnostic message is allowed to keep ECU knocked out
