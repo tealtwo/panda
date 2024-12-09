@@ -250,8 +250,8 @@ class HondaBase(common.PandaCarSafetyTest):
     self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
     self.assertFalse(self._tx(self._send_steer_msg(0x1000)))
 
-  def _lkas_button_msg(self, setting_btn):
-    values = {"CRUISE_SETTING": setting_btn, "COUNTER": self.cnt_button % 4}
+  def _lkas_button_msg(self, lkas_button=False, setting_btn=0):
+    values = {"CRUISE_SETTING": 1 if lkas_button else setting_btn, "COUNTER": self.cnt_button % 4}
     self.__class__.cnt_button += 1
     return self.packer.make_can_msg_panda("SCM_BUTTONS", self.PT_BUS, values)
 
@@ -268,7 +268,7 @@ class HondaBase(common.PandaCarSafetyTest):
           with self.subTest("lkas_button_press", button_state=lkas_button_press):
             self._mads_states_cleanup()
             self.safety.set_enable_mads(enable_mads, False)
-            self._rx(self._lkas_button_msg(lkas_button_press))
+            self._rx(self._lkas_button_msg(False, lkas_button_press))
             self.assertEqual(enable_mads and lkas_button_press == 1, self.safety.get_controls_allowed_lat())
     self._mads_states_cleanup()
 
@@ -406,8 +406,8 @@ class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
     self.__class__.cnt_button += 1
     return self.packer.make_can_msg_panda("SCM_BUTTONS", bus, values)
 
-  def _lkas_button_msg(self, setting_btn):
-    values = {"CRUISE_SETTING": setting_btn, "COUNTER": self.cnt_button % 4}
+  def _lkas_button_msg(self, lkas_button=False, setting_btn=0):
+    values = {"CRUISE_SETTING": 1 if lkas_button else setting_btn, "COUNTER": self.cnt_button % 4}
     self.__class__.cnt_button += 1
     return self.packer.make_can_msg_panda("SCM_BUTTONS", self.PT_BUS, values)
 

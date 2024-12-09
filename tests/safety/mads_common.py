@@ -293,6 +293,7 @@ class MadsCommonBase(unittest.TestCase):
       self._mads_states_cleanup()
       self.safety.set_enable_mads(True, False)
       self.safety.set_acc_main_on(True)
+      self.assertFalse(self.safety.get_controls_allowed_lat())
 
       # Enable controls initially with LKAS button
       self._rx(self._lkas_button_msg(True))
@@ -303,7 +304,7 @@ class MadsCommonBase(unittest.TestCase):
       self._rx(self._lkas_button_msg(True))
       self._rx(self._lkas_button_msg(False))
 
-      # Controls should still be allowed
+      # Controls should be disabled
       self.assertFalse(self.safety.get_controls_allowed_lat(),
                       "Controls should be disabled with LKAS button press while ACC main is on")
     finally:
@@ -326,7 +327,6 @@ class MadsCommonBase(unittest.TestCase):
       self._mads_states_cleanup()
       self.safety.set_enable_mads(True, False)
       self.safety.set_acc_main_on(True)
-      self.safety.set_controls_allowed_lat(False)
 
       self._rx(self._lkas_button_msg(True))
       self._rx(self._lkas_button_msg(False))
