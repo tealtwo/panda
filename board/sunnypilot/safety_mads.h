@@ -97,7 +97,7 @@ static void m_update_binary_state(BinaryStateTracking *state) {
   state->transition = m_get_edge_transition(*state->current, state->previous);
 
   // Evaluate PCM main cruise availability only on rising/falling edges
-  if (state->transition == MADS_EDGE_RISING || state->transition == MADS_EDGE_FALLING) {
+  if ((state->transition == MADS_EDGE_RISING) || (state->transition == MADS_EDGE_FALLING)) {
     state->available = true;
   }
 
