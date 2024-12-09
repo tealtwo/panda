@@ -11,7 +11,14 @@ class MadsCommonBase(unittest.TestCase):
   def _acc_state_msg(self, enabled):
     raise NotImplementedError
 
-  def test_enable_control_from_mads_button_press(self):
+  def _mads_states_cleanup(self):
+    self.safety.set_mads_button_press(-1)
+    self.safety.set_controls_allowed_lat(False)
+    self.safety.set_controls_requested_lat(False)
+    self.safety.set_acc_main_on(False)
+    self.safety.set_enable_mads(False, False)
+
+  def test_enable_control_allowed_from_mads_button_press(self):
     try:
       self._lkas_button_msg(False)
     except NotImplementedError:
@@ -21,7 +28,7 @@ class MadsCommonBase(unittest.TestCase):
     try:
       for enable_mads in (True, False):
         with self.subTest("enable_mads", mads_enabled=enable_mads):
-          for mads_button_press in [True, False]:
+          for mads_button_press in (True, False):
             with self.subTest("mads_button_press", button_state=mads_button_press):
               self._mads_states_cleanup()
               self.safety.set_enable_mads(enable_mads, False)
@@ -29,13 +36,6 @@ class MadsCommonBase(unittest.TestCase):
               self.assertEqual(enable_mads and mads_button_press, self.safety.get_controls_allowed_lat())
     finally:
       self._mads_states_cleanup()
-
-  def _mads_states_cleanup(self):
-    self.safety.set_mads_button_press(-1)
-    self.safety.set_controls_allowed_lat(False)
-    self.safety.set_controls_requested_lat(False)
-    self.safety.set_acc_main_on(False)
-    self.safety.set_enable_mads(False, False)
 
   def test_enable_control_from_setting_main_cruise_manually(self):
     try:

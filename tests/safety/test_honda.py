@@ -255,13 +255,13 @@ class HondaBase(common.PandaCarSafetyTest):
     self.__class__.cnt_button += 1
     return self.packer.make_can_msg_panda("SCM_BUTTONS", self.PT_BUS, values)
 
-  def test_enable_control_from_mads_button_press(self):
+  def test_enable_control_allowed_from_mads_button_press(self):
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
         for mads_button_press in range(4):
+          self._mads_states_cleanup()
+          self.safety.set_enable_mads(enable_mads, False)
           with self.subTest("mads_button_press", button_state=mads_button_press):
-            self._mads_states_cleanup()
-            self.safety.set_enable_mads(enable_mads, False)
             self._rx(self._lkas_button_msg(False, mads_button_press))
             self.assertEqual(enable_mads and mads_button_press == 1, self.safety.get_controls_allowed_lat())
     self._mads_states_cleanup()
