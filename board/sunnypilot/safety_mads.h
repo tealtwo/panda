@@ -131,6 +131,10 @@ static void m_mads_update_state(void) {
       mads_exit_controls(MADS_DISENGAGE_REASON_BUTTON);
     }
   }
+
+  if (m_mads_state.acc_main.transition == MADS_EDGE_RISING) {
+    m_mads_state.controls_requested_lat = true;
+  }
 }
 
 // ===============================
@@ -159,19 +163,18 @@ inline bool mads_is_lateral_control_allowed_by_mads(void) {
   return m_mads_state.system_enabled && m_mads_state.controls_allowed_lat;
 }
 
-inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_main, bool is_braking, bool cruise_engaged) {
+inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_main, bool is_braking, const bool *op_allowed) {
   m_mads_state.is_vehicle_moving_ptr = op_vehicle_moving;
   m_mads_state.acc_main.current = op_acc_main;
+  m_mads_state.op_controls_allowed.current = op_allowed;
   m_mads_state.lkas_button.current = &lkas_button_press;
 
   m_update_binary_state(&m_mads_state.acc_main);
+  m_update_binary_state(&m_mads_state.op_controls_allowed);
   m_update_button_state(&m_mads_state.lkas_button);
 
   m_mads_update_state();
 
-  //TODO-SP: Should we use this?
-  UNUSED(cruise_engaged);
-  // m_mads_state.cruise_engaged = cruise_engaged;
   m_mads_check_braking(is_braking);
   m_mads_try_allow_controls_lat();
 }

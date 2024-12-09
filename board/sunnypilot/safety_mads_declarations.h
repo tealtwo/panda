@@ -60,6 +60,7 @@ typedef struct {
 
   ButtonStateTracking lkas_button;
   BinaryStateTracking acc_main;
+  BinaryStateTracking op_controls_allowed;
 
   DisengageState current_disengage;
   DisengageState previous_disengage;
@@ -86,6 +87,6 @@ extern MADSState m_mads_state;
 
 extern const MADSState* get_mads_state(void);
 extern void mads_set_system_state(bool enabled, bool disengage_lateral_on_brake);
-extern void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_main, bool is_braking, bool cruise_engaged);
+extern void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_main, bool is_braking, const bool *op_allowed);
 extern void mads_exit_controls(DisengageReason reason);
 extern bool mads_is_lateral_control_allowed_by_mads(void);
