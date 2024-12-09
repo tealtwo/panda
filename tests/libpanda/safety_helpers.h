@@ -209,30 +209,6 @@ bool get_honda_fwd_brake(void){
   return honda_fwd_brake;
 }
 
-int get_main_button_press(void){
-  return main_button_press;
-}
-
-void set_mads_state_flags(int flags){
-  m_mads_state.state_flags = flags;
-}
-
-int get_mads_state_flags(void){
-  return get_mads_state()->state_flags; 
-}
-
-int get_mads_main_button_current(void){
-  return *m_mads_state.main_button.current;
-}
-
-int get_mads_main_button_last(void){
-  return get_mads_state()->main_button.last;
-}
-
-void set_main_button_press(int c){
-  main_button_press = c;
-}
-
 void set_lkas_button_press(int c){
   lkas_button_press = c;
 }

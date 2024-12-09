@@ -32,10 +32,6 @@ typedef enum __attribute__((packed)) {
 #define ALT_EXP_DISABLE_DISENGAGE_LATERAL_ON_BRAKE 2048
 
 #define MISMATCH_DEFAULT_THRESHOLD 25
-#define MADS_STATE_FLAG_DEFAULT 0U
-#define MADS_STATE_FLAG_RESERVED 1U
-#define MADS_STATE_FLAG_MAIN_BUTTON_AVAILABLE 2U
-#define MADS_STATE_FLAG_LKAS_BUTTON_AVAILABLE 4U
 
 // ===============================
 // Data Structures
@@ -60,10 +56,8 @@ typedef struct {
 } BinaryStateTracking;
 
 typedef struct {
-  uint32_t state_flags;
   const bool *is_vehicle_moving_ptr;
 
-  ButtonStateTracking main_button;
   ButtonStateTracking lkas_button;
   BinaryStateTracking acc_main;
 
@@ -83,7 +77,6 @@ typedef struct {
 // Global Variables
 // ===============================
 
-extern ButtonState main_button_press;
 extern ButtonState lkas_button_press;
 extern MADSState m_mads_state;
 

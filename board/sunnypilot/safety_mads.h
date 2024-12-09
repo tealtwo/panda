@@ -6,7 +6,6 @@
 // Global Variables
 // ===============================
 
-ButtonState main_button_press = MADS_BUTTON_UNAVAILABLE;
 ButtonState lkas_button_press = MADS_BUTTON_UNAVAILABLE;
 MADSState m_mads_state;
 
@@ -31,9 +30,7 @@ static EdgeTransition m_get_edge_transition(bool current, bool last) {
 static void m_mads_state_init(void) {
   m_mads_state.is_vehicle_moving_ptr = NULL;
   m_mads_state.acc_main.current = NULL;
-  m_mads_state.main_button.current = NULL;
   m_mads_state.lkas_button.current = NULL;
-  m_mads_state.state_flags = MADS_STATE_FLAG_DEFAULT;
 
   m_mads_state.system_enabled = false;
   m_mads_state.disengage_lateral_on_brake = true;
@@ -41,9 +38,6 @@ static void m_mads_state_init(void) {
   m_mads_state.acc_main.available = false;
   m_mads_state.acc_main.previous = false;
   m_mads_state.acc_main.transition = MADS_EDGE_NO_CHANGE;
-
-  m_mads_state.main_button.last = MADS_BUTTON_UNAVAILABLE;
-  m_mads_state.main_button.transition = MADS_EDGE_NO_CHANGE;
 
   m_mads_state.lkas_button.last = MADS_BUTTON_UNAVAILABLE;
   m_mads_state.lkas_button.transition = MADS_EDGE_NO_CHANGE;
@@ -129,18 +123,6 @@ static void m_mads_update_state(void) {
   } else {
   }
 
-  // Main cruise button, only invoke if PCM main cruise is not available
-  // Toggle MADS on falling edge of main cruise button
-  // TODO-SP: sync acc_main_on_non_pcm with sunnypilot's internally tracked acc_main_on (SP-acc_main_on) when
-  //          SP-acc_main_on is on falling edge
-  if ((m_mads_state.main_button.transition == MADS_EDGE_FALLING) && !m_mads_state.acc_main.available) {
-    m_mads_state.acc_main_on_non_pcm = !m_mads_state.acc_main_on_non_pcm;
-    m_mads_state.controls_requested_lat = m_mads_state.acc_main_on_non_pcm;
-    if (!m_mads_state.controls_requested_lat) {
-      mads_exit_controls(MADS_DISENGAGE_REASON_BUTTON);
-    }
-  }
-
   // LKAS button
   if (m_mads_state.lkas_button.transition == MADS_EDGE_RISING) {
     m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat;
@@ -180,19 +162,9 @@ inline bool mads_is_lateral_control_allowed_by_mads(void) {
 inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_main, bool is_braking, bool cruise_engaged) {
   m_mads_state.is_vehicle_moving_ptr = op_vehicle_moving;
   m_mads_state.acc_main.current = op_acc_main;
-  m_mads_state.main_button.current = &main_button_press;
   m_mads_state.lkas_button.current = &lkas_button_press;
 
-  if (!(m_mads_state.state_flags & MADS_STATE_FLAG_MAIN_BUTTON_AVAILABLE) && (main_button_press != MADS_BUTTON_UNAVAILABLE)) {
-    m_mads_state.state_flags |= MADS_STATE_FLAG_MAIN_BUTTON_AVAILABLE;
-  }
-
-  if (!(m_mads_state.state_flags & MADS_STATE_FLAG_LKAS_BUTTON_AVAILABLE) && (lkas_button_press != MADS_BUTTON_UNAVAILABLE)) {
-    m_mads_state.state_flags |= MADS_STATE_FLAG_LKAS_BUTTON_AVAILABLE;
-  }
-
   m_update_binary_state(&m_mads_state.acc_main);
-  m_update_button_state(&m_mads_state.main_button);
   m_update_button_state(&m_mads_state.lkas_button);
 
   m_mads_update_state();
