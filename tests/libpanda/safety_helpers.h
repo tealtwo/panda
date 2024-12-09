@@ -264,6 +264,10 @@ void set_controls_requested_lat(bool c){
   m_mads_state.controls_requested_lat = c;
 }
 
+bool get_pcm_main_cruise_available(void){
+  return m_mads_state.acc_main.available;
+}
+
 //int get_temp_debug(void){
 //  return temp_debug;
 //}
