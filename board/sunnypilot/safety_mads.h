@@ -155,7 +155,7 @@ inline bool mads_is_lateral_control_allowed_by_mads(void) {
   return m_mads_state.system_enabled && m_mads_state.controls_allowed_lat;
 }
 
-inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_main, bool is_braking, const bool *op_allowed) {
+inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_main, const bool *op_allowed, bool is_braking) {
   m_mads_state.is_vehicle_moving_ptr = op_vehicle_moving;
   m_mads_state.acc_main.current = op_acc_main;
   m_mads_state.op_controls_allowed.current = op_allowed;
