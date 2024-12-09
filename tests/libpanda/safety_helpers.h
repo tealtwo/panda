@@ -268,6 +268,10 @@ bool get_pcm_main_cruise_available(void){
   return m_mads_state.acc_main.available;
 }
 
+bool get_acc_main_on_non_pcm(void){
+  return m_mads_state.acc_main_on_non_pcm;
+}
+
 //int get_temp_debug(void){
 //  return temp_debug;
 //}

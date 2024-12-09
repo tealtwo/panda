@@ -515,3 +515,75 @@ class MadsCommonNonPCMBase(unittest.TestCase):
       self.assertFalse(self.safety.get_controls_allowed_lat())
     finally:
       self._mads_states_cleanup()
+
+  def test_acc_main_non_pcm_toggle_behavior(self):
+    """Test that non-PCM ACC main properly toggles states"""
+    try:
+      self._mads_states_cleanup()
+      self.safety.set_enable_mads(True, False)
+
+      # Initial state should be False
+      self.assertFalse(self.safety.get_acc_main_on_non_pcm())
+      self.assertFalse(self.safety.get_controls_requested_lat())
+
+      # First button press should toggle to True
+      self._rx(self._main_cruise_button_msg(True))
+      self._rx(self._main_cruise_button_msg(False))
+      self.assertTrue(self.safety.get_acc_main_on_non_pcm())
+      self.assertTrue(self.safety.get_controls_requested_lat())
+
+      # Second press should toggle to False
+      self._rx(self._main_cruise_button_msg(True))
+      self._rx(self._main_cruise_button_msg(False))
+      self.assertFalse(self.safety.get_acc_main_on_non_pcm())
+      self.assertFalse(self.safety.get_controls_requested_lat())
+    finally:
+      self._mads_states_cleanup()
+
+  def test_acc_main_non_pcm_multiple_toggles(self):
+    """Test multiple consecutive toggles of non-PCM ACC main"""
+    try:
+      self._mads_states_cleanup()
+      self.safety.set_enable_mads(True, False)
+
+      expected_state = False
+      # Test several toggle cycles
+      for _ in range(5):
+        self.assertEqual(self.safety.get_acc_main_on_non_pcm(), expected_state)
+        self.assertEqual(self.safety.get_controls_requested_lat(), expected_state)
+
+        self._rx(self._main_cruise_button_msg(True))
+        self._rx(self._main_cruise_button_msg(False))
+        expected_state = not expected_state
+    finally:
+      self._mads_states_cleanup()
+
+  def test_acc_main_non_pcm_controls_sync(self):
+    """Test that controls_requested_lat stays in sync with acc_main_non_pcm"""
+    try:
+      self._mads_states_cleanup()
+      self.safety.set_enable_mads(True, False)
+
+      # Test initial state
+      self.assertFalse(self.safety.get_acc_main_on_non_pcm())
+      self.assertFalse(self.safety.get_controls_requested_lat())
+
+      # Toggle and verify both states
+      for _ in range(3):
+        # Toggle on
+        self._rx(self._main_cruise_button_msg(True))
+        self._rx(self._main_cruise_button_msg(False))
+        self.assertTrue(self.safety.get_acc_main_on_non_pcm())
+        self.assertTrue(self.safety.get_controls_requested_lat())
+
+        # Toggle off
+        self._rx(self._main_cruise_button_msg(True))
+        self._rx(self._main_cruise_button_msg(False))
+        self.assertFalse(self.safety.get_acc_main_on_non_pcm())
+        self.assertFalse(self.safety.get_controls_requested_lat())
+
+        # Verify controls exit was called
+        self.assertEqual(self.safety.get_current_disengage_reason(),
+                         self.safety.get_disengage_reason_button())
+    finally:
+      self._mads_states_cleanup()
