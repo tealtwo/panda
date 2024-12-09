@@ -123,6 +123,7 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
       lkas_button_press = MADS_BUTTON_PRESSED;
     } else if (cruise_setting == 0) {
       lkas_button_press = MADS_BUTTON_NOT_PRESSED;
+    } else {
     }
 
     // enter controls on the falling edge of set or resume
