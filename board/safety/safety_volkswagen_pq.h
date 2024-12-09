@@ -212,7 +212,7 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *to_send) {
 
   // FORCE CANCEL: ensuring that only the cancel button press is sent when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if (addr == MSG_GRA_NEU) {
+  if (volkswagen_longitudinal && (addr == MSG_GRA_NEU)) {
     // Signal: GRA_Neu.GRA_Neu_Setzen
     // Signal: GRA_Neu.GRA_Neu_Recall
     /*if (GET_BIT(to_send, 16U) || GET_BIT(to_send, 17U)) {
@@ -238,7 +238,7 @@ static int volkswagen_pq_fwd_hook(int bus_num, int addr) {
 
   switch (bus_num) {
     case 0:
-      if ((addr == MSG_MOTOR_2) || (addr == MSG_BREMSE_8) || (addr == MSG_BREMSE_11) || (addr == MSG_EPB_1)) {
+      if ((addr == MSG_MOTOR_2) || (addr == MSG_BREMSE_8) || (addr == MSG_BREMSE_11) || (addr == MSG_EPB_1) || (!volkswagen_longitudinal && (addr == MSG_GRA_NEU))) {
         // openpilot takes over signals OEM-radar listens to
         bus_fwd = -1;
       } else {
