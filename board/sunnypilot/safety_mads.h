@@ -59,6 +59,8 @@ static bool m_can_allow_controls_lat(void) {
       case MADS_DISENGAGE_REASON_BRAKE:
         allowed = !state->is_braking && state->disengage_lateral_on_brake;
         break;
+      case MADS_DISENGAGE_REASON_NON_PCM_ACC_MAIN_DESYNC:
+      case MADS_DISENGAGE_REASON_ACC_MAIN_OFF:
       case MADS_DISENGAGE_REASON_LAG:
       case MADS_DISENGAGE_REASON_BUTTON:
       case MADS_DISENGAGE_REASON_NONE:

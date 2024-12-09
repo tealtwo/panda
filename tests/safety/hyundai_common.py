@@ -222,7 +222,6 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         # Counter should reset after disengagement
         self._tx(self._tx_acc_state_msg(False))
         self.assertEqual(0, self.safety.get_acc_main_on_mismatches())
-
     self._mads_states_cleanup()
 
   def test_acc_main_sync_mismatch_recovery(self):
