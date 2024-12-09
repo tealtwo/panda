@@ -328,7 +328,10 @@ class MadsCommonBase(unittest.TestCase):
     try:
       self._mads_states_cleanup()
       self.safety.set_enable_mads(True, False)
-      self.safety.set_acc_main_on(True)
+      self._rx(self._acc_state_msg(True))
+      self.assertTrue(self.safety.get_acc_main_on())
+      self.safety.set_controls_allowed_lat(False)
+      self.assertFalse(self.safety.get_controls_allowed_lat())
 
       self._rx(self._lkas_button_msg(True))
       self._rx(self._lkas_button_msg(False))
