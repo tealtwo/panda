@@ -6,7 +6,7 @@
 // Global Variables
 // ===============================
 
-ButtonState lkas_button_press = MADS_BUTTON_UNAVAILABLE;
+ButtonState mads_button_press = MADS_BUTTON_UNAVAILABLE;
 MADSState m_mads_state;
 
 // ===============================
@@ -30,7 +30,7 @@ static EdgeTransition m_get_edge_transition(bool current, bool last) {
 static void m_mads_state_init(void) {
   m_mads_state.is_vehicle_moving_ptr = NULL;
   m_mads_state.acc_main.current = NULL;
-  m_mads_state.lkas_button.current = NULL;
+  m_mads_state.mads_button.current = NULL;
 
   m_mads_state.system_enabled = false;
   m_mads_state.disengage_lateral_on_brake = true;
@@ -38,15 +38,14 @@ static void m_mads_state_init(void) {
   m_mads_state.acc_main.previous = false;
   m_mads_state.acc_main.transition = MADS_EDGE_NO_CHANGE;
 
-  m_mads_state.lkas_button.last = MADS_BUTTON_UNAVAILABLE;
-  m_mads_state.lkas_button.transition = MADS_EDGE_NO_CHANGE;
+  m_mads_state.mads_button.last = MADS_BUTTON_UNAVAILABLE;
+  m_mads_state.mads_button.transition = MADS_EDGE_NO_CHANGE;
 
 
   m_mads_state.current_disengage.reason = MADS_DISENGAGE_REASON_NONE;
   m_mads_state.previous_disengage = m_mads_state.current_disengage;
 
   m_mads_state.is_braking = false;
-  // m_mads_state.cruise_engaged = false;
   m_mads_state.controls_requested_lat = false;
   m_mads_state.controls_allowed_lat = false;
 }
@@ -117,8 +116,8 @@ static void m_mads_update_state(void) {
   } else {
   }
 
-  // LKAS button
-  if (m_mads_state.lkas_button.transition == MADS_EDGE_RISING) {
+  // MADS button
+  if (m_mads_state.mads_button.transition == MADS_EDGE_RISING) {
     m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat;
 
     if (!m_mads_state.controls_requested_lat) {
@@ -161,11 +160,11 @@ inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_
   m_mads_state.is_vehicle_moving_ptr = op_vehicle_moving;
   m_mads_state.acc_main.current = op_acc_main;
   m_mads_state.op_controls_allowed.current = op_allowed;
-  m_mads_state.lkas_button.current = &lkas_button_press;
+  m_mads_state.mads_button.current = &mads_button_press;
 
   m_update_binary_state(&m_mads_state.acc_main);
   m_update_binary_state(&m_mads_state.op_controls_allowed);
-  m_update_button_state(&m_mads_state.lkas_button);
+  m_update_button_state(&m_mads_state.mads_button);
 
   m_mads_update_state();
 

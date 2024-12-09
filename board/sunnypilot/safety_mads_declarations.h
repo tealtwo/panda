@@ -58,7 +58,7 @@ typedef struct {
 typedef struct {
   const bool *is_vehicle_moving_ptr;
 
-  ButtonStateTracking lkas_button;
+  ButtonStateTracking mads_button;
   BinaryStateTracking acc_main;
   BinaryStateTracking op_controls_allowed;
 
@@ -77,7 +77,7 @@ typedef struct {
 // Global Variables
 // ===============================
 
-extern ButtonState lkas_button_press;
+extern ButtonState mads_button_press;
 extern MADSState m_mads_state;
 
 // ===============================

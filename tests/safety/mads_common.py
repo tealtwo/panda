@@ -11,7 +11,7 @@ class MadsCommonBase(unittest.TestCase):
   def _acc_state_msg(self, enabled):
     raise NotImplementedError
 
-  def test_enable_control_from_lkas_button_press(self):
+  def test_enable_control_from_mads_button_press(self):
     try:
       self._lkas_button_msg(False)
     except NotImplementedError:
@@ -21,17 +21,17 @@ class MadsCommonBase(unittest.TestCase):
     try:
       for enable_mads in (True, False):
         with self.subTest("enable_mads", mads_enabled=enable_mads):
-          for lkas_button_press in [True, False]:
-            with self.subTest("lkas_button_press", button_state=lkas_button_press):
+          for mads_button_press in [True, False]:
+            with self.subTest("mads_button_press", button_state=mads_button_press):
               self._mads_states_cleanup()
               self.safety.set_enable_mads(enable_mads, False)
-              self._rx(self._lkas_button_msg(lkas_button_press))
-              self.assertEqual(enable_mads and lkas_button_press, self.safety.get_controls_allowed_lat())
+              self._rx(self._lkas_button_msg(mads_button_press))
+              self.assertEqual(enable_mads and mads_button_press, self.safety.get_controls_allowed_lat())
     finally:
       self._mads_states_cleanup()
 
   def _mads_states_cleanup(self):
-    self.safety.set_lkas_button_press(-1)
+    self.safety.set_mads_button_press(-1)
     self.safety.set_controls_allowed_lat(False)
     self.safety.set_controls_requested_lat(False)
     self.safety.set_acc_main_on(False)
@@ -57,17 +57,17 @@ class MadsCommonBase(unittest.TestCase):
     finally:
       self._mads_states_cleanup()
 
-  def test_enable_control_from_setting_lkas_state_manually(self):
+  def test_enable_control_from_setting_mads_button_state_manually(self):
     try:
       for enable_mads in (True, False):
         with self.subTest("enable_mads", mads_enabled=enable_mads):
-          for lkas_button_press in (-1, 0, 1):
-            with self.subTest("lkas_button_press", button_state=lkas_button_press):
+          for mads_button_press in (-1, 0, 1):
+            with self.subTest("mads_button_press", button_state=mads_button_press):
               self._mads_states_cleanup()
               self.safety.set_enable_mads(enable_mads, False)
-              self.safety.set_lkas_button_press(lkas_button_press)
+              self.safety.set_mads_button_press(mads_button_press)
               self._rx(self._speed_msg(0))
-              self.assertEqual(enable_mads and lkas_button_press == 1, self.safety.get_controls_allowed_lat())
+              self.assertEqual(enable_mads and mads_button_press == 1, self.safety.get_controls_allowed_lat())
     finally:
       self._mads_states_cleanup()
 
@@ -140,12 +140,12 @@ class MadsCommonBase(unittest.TestCase):
     finally:
       self._mads_states_cleanup()
 
-  def test_lkas_button_press_with_main_cruise(self):
-    """Test that LKAS/LFA button presses don't disengage controls when main cruise is on"""
+  def test_mads_button_press_with_main_cruise(self):
+    """Test that MADS button presses don't disengage controls when main cruise is on"""
     try:
       self._lkas_button_msg(False)
     except NotImplementedError:
-      raise unittest.SkipTest("Skipping test because LKAS button not supported")
+      raise unittest.SkipTest("Skipping test because MADS button is not supported")
 
     try:
       self._mads_states_cleanup()
@@ -153,37 +153,37 @@ class MadsCommonBase(unittest.TestCase):
       self.safety.set_acc_main_on(True)
       self.assertFalse(self.safety.get_controls_allowed_lat())
 
-      # Enable controls initially with LKAS button
+      # Enable controls initially with MADS button
       self._rx(self._lkas_button_msg(True))
       self._rx(self._lkas_button_msg(False))
       self._rx(self._speed_msg(0))
       self.assertTrue(self.safety.get_controls_allowed_lat())
 
-      # Test LKAS button press while ACC main is on
+      # Test MADS button press while ACC main is on
       self._rx(self._lkas_button_msg(True))
       self._rx(self._lkas_button_msg(False))
       self._rx(self._speed_msg(0))
 
       # Controls should be disabled
       self.assertFalse(self.safety.get_controls_allowed_lat(),
-                      "Controls should be disabled with LKAS button press while ACC main is on")
+                      "Controls should be disabled with MADS button press while ACC main is on")
     finally:
       self._mads_states_cleanup()
 
-  def test_enable_lateral_control_with_lfa_and_disable_with_main_cruise(self):
-    """Tests main cruise and LKAS button state transitions.
+  def test_enable_lateral_control_with_mads_button_and_disable_with_main_cruise(self):
+    """Tests main cruise and MADS button state transitions.
 
       Sequence:
       1. Main cruise off -> on
-      2. LKAS button disengage
-      3. LKAS button engage
+      2. MADS button disengage
+      3. MADS button engage
       4. Main cruise off
 
     """
     try:
       self._lkas_button_msg(False)
     except NotImplementedError:
-      raise unittest.SkipTest("Skipping test because LKAS button not supported")
+      raise unittest.SkipTest("Skipping test because MADS button is not supported")
 
     try:
       self._acc_state_msg(False)
@@ -213,12 +213,12 @@ class MadsCommonBase(unittest.TestCase):
     finally:
       self._mads_states_cleanup()
 
-  def test_enable_and_disable_lateral_control_with_lfa_button(self):
-    """Test Scenario 5: Toggle MADS with LFA button"""
+  def test_enable_and_disable_lateral_control_with_mads_button(self):
+    """Test Scenario 5: Toggle MADS with MADS button"""
     try:
       self._lkas_button_msg(False)
     except NotImplementedError:
-      raise unittest.SkipTest("Skipping test because LKAS button not supported")
+      raise unittest.SkipTest("Skipping test because MADS button is not supported")
 
     try:
       self._mads_states_cleanup()

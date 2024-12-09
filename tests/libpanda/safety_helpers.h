@@ -209,12 +209,12 @@ bool get_honda_fwd_brake(void){
   return honda_fwd_brake;
 }
 
-void set_lkas_button_press(int c){
-  lkas_button_press = c;
+void set_mads_button_press(int c){
+  mads_button_press = c;
 }
 
-int get_lkas_button_press(void){
-  return lkas_button_press;
+int get_mads_button_press(void){
+  return mads_button_press;
 }
 
 void set_controls_allowed_lat(bool c){

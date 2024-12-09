@@ -131,7 +131,7 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
       self.assertFalse(self._rx(to_push))
       self.assertFalse(self.safety.get_controls_allowed())
 
-  def test_enable_control_from_lkas_button_press(self):
+  def test_enable_control_from_mads_button_press(self):
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
         for lkas_hud in range(4):
@@ -143,14 +143,14 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
             self.assertEqual(enable_mads and lkas_hud in range(1, 4), self.safety.get_controls_allowed_lat())
     self._mads_states_cleanup()
 
-  def test_enable_and_disable_lateral_control_with_lfa_button(self):
-    raise unittest.SkipTest("For Toyota, we only use the LFA detection to allow lateral control, not to disable it")
+  def test_enable_and_disable_lateral_control_with_mads_button(self):
+    raise unittest.SkipTest("For Toyota, we only use the MADS button detection to allow lateral control, not to disable it")
 
-  def test_enable_lateral_control_with_lfa_and_disable_with_main_cruise(self):
+  def test_enable_lateral_control_with_mads_button_and_disable_with_main_cruise(self):
     # For Toyota, it is not a button, but the LKAS icon. The behavior is flaky, skip this test until we find a more reliable signal
     raise unittest.SkipTest
 
-  def test_lkas_button_press_with_main_cruise(self):
+  def test_mads_button_press_with_main_cruise(self):
     # For Toyota, it is not a button, but the LKAS icon. The behavior is flaky, skip this test until we find a more reliable signal
     raise unittest.SkipTest
 

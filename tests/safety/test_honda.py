@@ -255,15 +255,15 @@ class HondaBase(common.PandaCarSafetyTest):
     self.__class__.cnt_button += 1
     return self.packer.make_can_msg_panda("SCM_BUTTONS", self.PT_BUS, values)
 
-  def test_enable_control_from_lkas_button_press(self):
+  def test_enable_control_from_mads_button_press(self):
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
-        for lkas_button_press in range(4):
-          with self.subTest("lkas_button_press", button_state=lkas_button_press):
+        for mads_button_press in range(4):
+          with self.subTest("mads_button_press", button_state=mads_button_press):
             self._mads_states_cleanup()
             self.safety.set_enable_mads(enable_mads, False)
-            self._rx(self._lkas_button_msg(False, lkas_button_press))
-            self.assertEqual(enable_mads and lkas_button_press == 1, self.safety.get_controls_allowed_lat())
+            self._rx(self._lkas_button_msg(False, mads_button_press))
+            self.assertEqual(enable_mads and mads_button_press == 1, self.safety.get_controls_allowed_lat())
     self._mads_states_cleanup()
 
 
@@ -388,7 +388,7 @@ class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
     return self.packer.make_can_msg_panda("SCM_BUTTONS", bus, values)
 
   # TODO-SP: Understand why FLAG_HONDA_NIDEC_ALT cars are failing with
-  def test_enable_lateral_control_with_lfa_and_disable_with_main_cruise(self):
+  def test_enable_lateral_control_with_mads_button_and_disable_with_main_cruise(self):
     raise unittest.SkipTest("Flaky test with Nidec Alternative PCM state")
 
 
