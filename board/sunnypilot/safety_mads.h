@@ -38,13 +38,16 @@ static void m_mads_state_init(void) {
   m_mads_state.system_enabled = false;
   m_mads_state.disengage_lateral_on_brake = true;
 
+  m_mads_state.acc_main.available = false;
+  m_mads_state.acc_main.previous = false;
+  m_mads_state.acc_main.transition = MADS_EDGE_NO_CHANGE;
+
   m_mads_state.main_button.last = MADS_BUTTON_UNAVAILABLE;
   m_mads_state.main_button.transition = MADS_EDGE_NO_CHANGE;
 
   m_mads_state.lkas_button.last = MADS_BUTTON_UNAVAILABLE;
   m_mads_state.lkas_button.transition = MADS_EDGE_NO_CHANGE;
 
-  m_mads_state.acc_main.previous = false;
 
   m_mads_state.current_disengage.reason = MADS_DISENGAGE_REASON_NONE;
   m_mads_state.previous_disengage = m_mads_state.current_disengage;
@@ -53,6 +56,7 @@ static void m_mads_state_init(void) {
   // m_mads_state.cruise_engaged = false;
   m_mads_state.controls_requested_lat = false;
   m_mads_state.controls_allowed_lat = false;
+  m_mads_state.acc_main_on_non_pcm = false;
 }
 
 static bool m_can_allow_controls_lat(void) {
@@ -90,28 +94,17 @@ static void m_update_button_state(ButtonStateTracking *button_state) {
       button_state->last == MADS_BUTTON_PRESSED
     );
 
-    if (button_state->transition == MADS_EDGE_RISING) {
-      const bool acc_main_enabled = *m_mads_state.acc_main.current;
-      m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat;
-      
-      if (!m_mads_state.controls_requested_lat && !acc_main_enabled) {
-        mads_exit_controls(MADS_DISENGAGE_REASON_BUTTON);
-      }
-    }
-
     button_state->last = *button_state->current;
   }
 }
 
+// PCM main cruise
 static void m_update_binary_state(BinaryStateTracking *state) {
-  EdgeTransition transition = m_get_edge_transition(*state->current, state->previous);
-  if (transition == MADS_EDGE_RISING) {
-    m_mads_state.controls_requested_lat = true;
-  } else if (transition == MADS_EDGE_FALLING) {
-    m_mads_state.controls_requested_lat = false;
-    mads_exit_controls(MADS_DISENGAGE_REASON_ACC_MAIN_OFF);
-  } else {
-    // Do nothing
+  state->transition = m_get_edge_transition(*state->current, state->previous);
+
+  // Invoke only once to evaluate if PCM main cruise is available
+  if (state->transition != MADS_EDGE_NO_CHANGE) {
+    state->available = true;
   }
 
   state->previous = *state->current;
@@ -122,6 +115,39 @@ static void m_mads_try_allow_controls_lat(void) {
     m_mads_state.controls_allowed_lat = true;
     m_mads_state.previous_disengage = m_mads_state.current_disengage;
     m_mads_state.current_disengage.reason = MADS_DISENGAGE_REASON_NONE;
+  }
+}
+
+// Use buttons or PCM state's transition properties to request lateral control
+static void m_mads_update_state(void) {
+  // PCM main cruise
+  if (m_mads_state.acc_main.transition == MADS_EDGE_RISING) {
+    m_mads_state.controls_requested_lat = true;
+  } else if (m_mads_state.acc_main.transition == MADS_EDGE_FALLING) {
+    m_mads_state.controls_requested_lat = false;
+    mads_exit_controls(MADS_DISENGAGE_REASON_ACC_MAIN_OFF);
+  } else {
+  }
+
+  // Main cruise button, only invoke if PCM main cruise is not available
+  // Toggle MADS on falling edge of main cruise button
+  // TODO-SP: sync acc_main_on_non_pcm with sunnypilot's internally tracked acc_main_on (SP-acc_main_on) when
+  //          SP-acc_main_on is on falling edge
+  if ((m_mads_state.main_button.transition == MADS_EDGE_FALLING) && !m_mads_state.acc_main.available) {
+    m_mads_state.acc_main_on_non_pcm = !m_mads_state.acc_main_on_non_pcm;
+    m_mads_state.controls_requested_lat = m_mads_state.acc_main_on_non_pcm;
+    if (!m_mads_state.controls_requested_lat) {
+      mads_exit_controls(MADS_DISENGAGE_REASON_BUTTON);
+    }
+  }
+
+  // LKAS button
+  if (m_mads_state.lkas_button.transition == MADS_EDGE_RISING) {
+    m_mads_state.controls_requested_lat = !m_mads_state.controls_allowed_lat;
+
+    if (!m_mads_state.controls_requested_lat) {
+      mads_exit_controls(MADS_DISENGAGE_REASON_BUTTON);
+    }
   }
 }
 
@@ -165,9 +191,11 @@ inline void mads_state_update(const bool *op_vehicle_moving, const bool *op_acc_
     m_mads_state.state_flags |= MADS_STATE_FLAG_LKAS_BUTTON_AVAILABLE;
   }
 
+  m_update_binary_state(&m_mads_state.acc_main);
   m_update_button_state(&m_mads_state.main_button);
   m_update_button_state(&m_mads_state.lkas_button);
-  m_update_binary_state(&m_mads_state.acc_main);
+
+  m_mads_update_state();
 
   //TODO-SP: Should we use this?
   UNUSED(cruise_engaged);

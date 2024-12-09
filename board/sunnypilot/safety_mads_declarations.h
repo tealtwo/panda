@@ -56,6 +56,7 @@ typedef struct {
   EdgeTransition transition;
   const bool *current;
   bool previous : 1;
+  bool available : 1;
 } BinaryStateTracking;
 
 typedef struct {
@@ -75,6 +76,7 @@ typedef struct {
   // bool cruise_engaged : 1;
   bool controls_requested_lat : 1;
   bool controls_allowed_lat : 1;
+  bool acc_main_on_non_pcm : 1;
 } MADSState;
 
 // ===============================
