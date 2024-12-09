@@ -138,6 +138,32 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
     self._rx(self._button_msg(Buttons.CANCEL))
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_main_cruise_button(self):
+    """Test that main cruise button correctly toggles acc_main_on state"""
+    for enable_mads in (True, False):
+      with self.subTest("enable_mads", mads_enabled=enable_mads):
+        # Test initial state
+        self._mads_states_cleanup()
+        self.safety.set_enable_mads(enable_mads, False)
+
+        self.assertFalse(self.safety.get_acc_main_on())
+
+        self._rx(self._main_cruise_button_msg(0))  # Set initial state
+        self._rx(self._main_cruise_button_msg(1))  # Press button
+        self.assertTrue(self.safety.get_acc_main_on())  # Should be on after press
+
+        self._rx(self._main_cruise_button_msg(0))  # Release button
+        self.assertTrue(self.safety.get_acc_main_on())  # Should stay on
+
+        self._rx(self._main_cruise_button_msg(1))  # Press again
+        self.assertFalse(self.safety.get_acc_main_on())  # Should toggle off
+
+        for _ in range(10):
+          self._rx(self._main_cruise_button_msg(1))
+          self.assertFalse(self.safety.get_acc_main_on())
+
+        self._mads_states_cleanup()
+
   def test_tester_present_allowed(self):
     """
       Ensure tester present diagnostic message is allowed to keep ECU knocked out
