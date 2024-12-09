@@ -81,8 +81,8 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
     values = {"CRUISE_ACTIVE": enable}
     return self.packer.make_can_msg_panda("PCM_CRUISE", 0, values)
 
-  def _lkas_button_msg(self, lkas_hud):
-    values = {"LKAS_STATUS": lkas_hud}
+  def _lkas_button_msg(self, lkas_pressed=False, lkas_hud=0):
+    values = {"LKAS_STATUS": 2 if lkas_pressed else lkas_hud}
     return self.packer.make_can_msg_panda("LKAS_HUD", 2, values)
 
   def test_diagnostics(self, stock_longitudinal: bool = False):
@@ -138,7 +138,7 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
           self._mads_states_cleanup()
           self.safety.set_enable_mads(enable_mads, False)
           with self.subTest("lkas_hud", button_state=lkas_hud):
-            self._rx(self._lkas_button_msg(lkas_hud))
+            self._rx(self._lkas_button_msg(False, lkas_hud))
             self._rx(self._speed_msg(0))  # Only for Toyota, we must send a msg to bus 0 because generic_rx_checks happen only there.
             self.assertEqual(enable_mads and lkas_hud in range(1, 4), self.safety.get_controls_allowed_lat())
     self._mads_states_cleanup()
