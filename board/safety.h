@@ -223,6 +223,8 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
     heartbeat_engaged_mismatches = 0;
   }
 
+  mads_state_update(&vehicle_moving, &acc_main_on, brake_pressed || regen_braking, &controls_allowed);
+
   return valid;
 }
 
@@ -350,7 +352,6 @@ void generic_rx_checks(bool stock_ecu_detected) {
   if ((safety_mode_cnt > RELAY_TRNS_TIMEOUT) && stock_ecu_detected) {
     relay_malfunction_set();
   }
-  mads_state_update(&vehicle_moving, &acc_main_on, brake_pressed || regen_braking, &controls_allowed);
 }
 
 static void relay_malfunction_reset(void) {

@@ -234,6 +234,19 @@ class MadsCommonBase(unittest.TestCase):
     finally:
       self._mads_states_cleanup()
 
+  def test_enable_lateral_control_with_controls_allowed_rising_edge(self):
+    try:
+      self._mads_states_cleanup()
+      self.safety.set_enable_mads(True, False)
+      self.safety.set_controls_allowed(False)
+      self._rx(self._speed_msg(0))
+      self.safety.set_controls_allowed(True)
+      self._rx(self._speed_msg(0))
+      self.assertTrue(self.safety.get_controls_allowed())
+      self.assertTrue(self.safety.get_controls_allowed_lat())
+    finally:
+      self._mads_states_cleanup()
+
 
 class MadsCommonNonPCMBase(unittest.TestCase):
   @abstractmethod

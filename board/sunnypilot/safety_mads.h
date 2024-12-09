@@ -124,7 +124,7 @@ static void m_mads_update_state(void) {
     }
   }
 
-  if (m_mads_state.acc_main.transition == MADS_EDGE_RISING) {
+  if (m_mads_state.op_controls_allowed.transition == MADS_EDGE_RISING) {
     m_mads_state.controls_requested_lat = true;
   }
 }
