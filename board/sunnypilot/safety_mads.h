@@ -90,7 +90,7 @@ static void m_update_button_state(ButtonStateTracking *button_state) {
   }
 }
 
-// PCM main cruise
+// Main cruise
 static void m_update_binary_state(BinaryStateTracking *state) {
   state->transition = m_get_edge_transition(*state->current, state->previous);
   state->previous = *state->current;
@@ -104,9 +104,9 @@ static void m_mads_try_allow_controls_lat(void) {
   }
 }
 
-// Use buttons or PCM state's transition properties to request lateral control
+// Use buttons or main cruise state transition properties to request lateral control
 static void m_mads_update_state(void) {
-  // PCM main cruise
+  // Main cruise
   if (m_mads_state.acc_main.transition == MADS_EDGE_RISING) {
     m_mads_state.controls_requested_lat = true;
   } else if (m_mads_state.acc_main.transition == MADS_EDGE_FALLING) {

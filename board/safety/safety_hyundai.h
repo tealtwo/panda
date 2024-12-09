@@ -180,6 +180,8 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
     }
     generic_rx_checks(stock_ecu_detected);
   }
+
+  hyundai_common_reset_acc_main_on_mismatches();
 }
 
 static bool hyundai_tx_hook(const CANPacket_t *to_send) {
@@ -198,6 +200,11 @@ static bool hyundai_tx_hook(const CANPacket_t *to_send) {
     if ((CR_VSM_DecCmd != 0) || FCA_CmdAct || CF_VSM_DecCmdAct) {
       tx = false;
     }
+  }
+
+  if (addr == 0x420) {
+    acc_main_on_tx = GET_BIT(to_send, 0U);
+    hyundai_common_acc_main_on_sync();
   }
 
   // ACCEL: safety check

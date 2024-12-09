@@ -44,12 +44,12 @@ class MadsCommonBase(unittest.TestCase):
     self.safety.set_acc_main_on(False)
     self.safety.set_enable_mads(False, False)
 
-  def test_enable_control_from_setting_pcm_main_cruise_manually(self):
+  def test_enable_control_from_setting_main_cruise_manually(self):
     try:
       self._acc_state_msg(False)
     except NotImplementedError:
       self._mads_states_cleanup()
-      raise unittest.SkipTest("Skipping test because non PCM main cruise is not available for this car with openpilot longitudinal")
+      raise unittest.SkipTest("Skipping test because _acc_state_msg is not implemented for this car")
 
     try:
       for enable_mads in (True, False):
@@ -147,8 +147,8 @@ class MadsCommonBase(unittest.TestCase):
     finally:
       self._mads_states_cleanup()
 
-  def test_lkas_button_press_with_pcm_main_cruise(self):
-    """Test that LKAS/LFA button presses don't disengage controls when PCM main cruise is on"""
+  def test_lkas_button_press_with_main_cruise(self):
+    """Test that LKAS/LFA button presses don't disengage controls when main cruise is on"""
     try:
       self._lkas_button_msg(False)
     except NotImplementedError:
@@ -177,14 +177,14 @@ class MadsCommonBase(unittest.TestCase):
     finally:
       self._mads_states_cleanup()
 
-  def test_enable_lateral_control_with_lfa_and_disable_with_pcm_main_cruise(self):
-    """Tests PCM main cruise and LKAS button state transitions.
+  def test_enable_lateral_control_with_lfa_and_disable_with_main_cruise(self):
+    """Tests main cruise and LKAS button state transitions.
 
       Sequence:
-      1. PCM main cruise off -> on
+      1. Main cruise off -> on
       2. LKAS button disengage
       3. LKAS button engage
-      4. PCM main cruise off
+      4. Main cruise off
 
     """
     try:
@@ -196,7 +196,7 @@ class MadsCommonBase(unittest.TestCase):
       self._acc_state_msg(False)
     except NotImplementedError:
       self._mads_states_cleanup()
-      raise unittest.SkipTest("Skipping test because non PCM main cruise is not available for this car with openpilot longitudinal")
+      raise unittest.SkipTest("Skipping test because _acc_state_msg is not implemented for this car")
 
     try:
       self._mads_states_cleanup()

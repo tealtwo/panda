@@ -121,6 +121,8 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
   }
   generic_rx_checks(stock_ecu_detected);
 
+  hyundai_common_reset_acc_main_on_mismatches();
+
 }
 
 static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
@@ -195,6 +197,9 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
     if (violation) {
       tx = false;
     }
+
+    acc_main_on_tx = GET_BIT(to_send, 66U);
+    hyundai_common_acc_main_on_sync();
   }
 
   return tx;

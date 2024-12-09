@@ -388,7 +388,7 @@ class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
     return self.packer.make_can_msg_panda("SCM_BUTTONS", bus, values)
 
   # TODO-SP: Understand why FLAG_HONDA_NIDEC_ALT cars are failing with
-  def test_enable_lateral_control_with_lfa_and_disable_with_pcm_main_cruise(self):
+  def test_enable_lateral_control_with_lfa_and_disable_with_main_cruise(self):
     raise unittest.SkipTest("Flaky test with Nidec Alternative PCM state")
 
 
