@@ -125,12 +125,12 @@ class TestSubaruSafetyBase(common.PandaCarSafetyTest):
     raise unittest.SkipTest("For Toyota, we only use the LFA detection to allow lateral control, not to disable it")
 
   def test_enable_lateral_control_with_lfa_and_disable_with_pcm_main_cruise(self):
-    raise unittest.SkipTest("For Toyota, it is not a button, but the LKAS icon."
-                            "The behavior is flaky, skip this test until we find a more reliable signal")
+    # For Subaru, it is not a button, but the LKAS icon. The behavior is flaky, skip this test until we find a more reliable signal
+    raise unittest.SkipTest
 
   def test_lkas_button_press_with_pcm_main_cruise(self):
-    raise unittest.SkipTest("For Toyota, it is not a button, but the LKAS icon."
-                            "The behavior is flaky, skip this test until we find a more reliable signal")
+    # For Subaru, it is not a button, but the LKAS icon. The behavior is flaky, skip this test until we find a more reliable signal
+    raise unittest.SkipTest
 
 class TestSubaruStockLongitudinalSafetyBase(TestSubaruSafetyBase):
   def _cancel_msg(self, cancel, cruise_throttle=0):
