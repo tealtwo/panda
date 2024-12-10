@@ -83,7 +83,7 @@ jobs:
       - name: Build Docker image
         run: eval "$BUILD"
       - name: Run safety tests
-        timeout-minutes: 8
+        timeout-minutes: 5
         run: |
           ${{ env.RUN }} "scons -c -j$(nproc) && \
                           scons -j$(nproc) ${{ matrix.flags }} && \
