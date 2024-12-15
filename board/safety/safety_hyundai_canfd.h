@@ -306,7 +306,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
       // Does not use the alt buttons message
       static RxCheck hyundai_canfd_hda2_rx_checks[] = {
         HYUNDAI_CANFD_COMMON_RX_CHECKS(1)
-        HYUNDAI_CANFD_BUTTONS_ADDR_CHECK(1)
+        HYUNDAI_CANFD_ALT_BUTTONS_ADDR_CHECK(1)
         HYUNDAI_CANFD_SCC_ADDR_CHECK(1)
       };
 
