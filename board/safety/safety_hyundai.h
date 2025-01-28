@@ -42,6 +42,7 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
   {0x50A, 0,       8},                       \
   {0x389, 0,       8},                       \
   {0x4A2, 0,       2},                       \
+  {0x53E, 0,       8},                       \
 
 #define HYUNDAI_COMMON_RX_CHECKS(legacy)                                                                                              \
   {.msg = {{0x260, 0, 8, .check_checksum = true, .max_counter = 3U, .frequency = 100U},                                       \
