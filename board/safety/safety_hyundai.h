@@ -30,6 +30,7 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
   {0x340, 0, 8}, // LKAS11 Bus 0
   {0x4F1, 0, 4}, // CLU11 Bus 0
   {0x485, 0, 8}, // LFAHDA_MFC Bus 0
+  {0x53E, 0, 8}, // LKAS12 Bus 0
 };
 
 #define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus) \
@@ -281,14 +282,14 @@ static int hyundai_fwd_hook(int bus_num, int addr) {
   }
 
   if (bus_num == 2) {
-    // Stock LKAS11 messages
-    bool is_lkas_11 = (addr == 0x340);
+    // Stock LKAS11 & LKAS12 messages
+    bool is_lkas_msg = (addr == 0x340) || (addr == 0x53E);
     // LFA and HDA cluster icons
     bool is_lfahda_mfc = (addr == 0x485);
     // Stock SCC messages, blocking when doing openpilot longitudinal on camera SCC cars
     bool is_scc_msg = (addr == 0x420) || (addr == 0x421) || (addr == 0x50A) || (addr == 0x389);
 
-    bool block_msg = is_lkas_11 || is_lfahda_mfc || (is_scc_msg && hyundai_longitudinal && hyundai_camera_scc);
+    bool block_msg = is_lkas_msg || is_lfahda_mfc || (is_scc_msg && hyundai_longitudinal && hyundai_camera_scc);
     if (!block_msg) {
       bus_fwd = 0;
     }
