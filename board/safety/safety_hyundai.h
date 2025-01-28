@@ -311,6 +311,7 @@ static safety_config hyundai_init(uint16_t param) {
     {0x340, 0, 8}, // LKAS11 Bus 0
     {0x4F1, 2, 4}, // CLU11 Bus 2
     {0x485, 0, 8}, // LFAHDA_MFC Bus 0
+    {0x53E, 0, 8}, // LKAS12 Bus 0
   };
 
   static const CanMsg HYUNDAI_LONG_ESCC_TX_MSGS[] = {
