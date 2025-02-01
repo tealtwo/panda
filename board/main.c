@@ -431,35 +431,7 @@ int main(void) {
   enable_interrupts();
 
   // LED should keep on blinking all the time
-#if defined(ESCC) && defined(DEBUG_CAN_LOOP) 
-  ESCC_Msg escc;
-  escc.fca_cmd_act = 1;
-  escc.aeb_cmd_act = 1;
-  escc.cf_vsm_warn_fca11 = 1;
-  escc.cf_vsm_warn_scc12 = 1;
-  escc.cf_vsm_deccmdact_scc12 = 1;
-  escc.cf_vsm_deccmdact_fca11 = 1;
-  escc.cr_vsm_deccmd_scc12 = 1;
-  escc.cr_vsm_deccmd_fca11 = 1;
-  escc.obj_valid = 1;
-  escc.acc_objstatus = 1;
-  escc.acc_obj_lat_pos_1 = 1;
-  escc.acc_obj_lat_pos_2 = 1;
-  escc.acc_obj_dist_1 = 1;
-  escc.acc_obj_dist_2 = 1;
-  escc.acc_obj_rel_spd_1 = 1;
-  escc.acc_obj_rel_spd_2 = 1;
-  int i = 0;
-#endif
-  
   while (true) {
-
-#if defined(ESCC) && defined(DEBUG_CAN_LOOP)
-    send_escc_msg(&escc, i++);
-    if(i > 3)
-      i = 0;
-#endif
-    
     if (power_save_status == POWER_SAVE_STATUS_DISABLED) {
       #ifdef DEBUG_FAULTS
       if (fault_status == FAULT_STATUS_NONE) {
