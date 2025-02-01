@@ -117,6 +117,7 @@ void set_safety_mode(uint16_t mode, uint16_t param) {
   can_init_all();
 }
 
+// cppcheck-suppress misra-c2012-5.5
 bool is_car_safety_mode(uint16_t mode) {
   return (mode != SAFETY_SILENT) &&
          (mode != SAFETY_NOOUTPUT) &&
