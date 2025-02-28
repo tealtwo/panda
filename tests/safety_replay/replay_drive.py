@@ -4,7 +4,7 @@ import os
 from collections import Counter, defaultdict
 
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
-from panda.tests.libpanda import libpanda_py
+from panda.tests.libsafety import libsafety_py
 from panda.tests.safety_replay.helpers import package_can_msg, init_segment
 
 # Define debug variables and their getter methods
@@ -21,7 +21,7 @@ DEBUG_VARS = {
 
 # replay a drive to check for safety violations
 def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
-  safety = libpanda_py.libpanda
+  safety = libsafety_py.libsafety
 
   err = safety.set_safety_hooks(safety_mode, param)
   assert err == 0, "invalid safety mode: %d" % safety_mode
