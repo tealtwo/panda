@@ -240,7 +240,7 @@ static int volkswagen_pq_fwd_hook(int bus_num, int addr) {
 
   switch (bus_num) {
     case 0:
-      if (volkswagen_longitudinal && ((addr == MSG_MOTOR_2) || (addr == MSG_GRA_NEU) || (addr == MSG_MOTOR_2) || (addr == MSG_BREMSE_8) || (addr == MSG_BREMSE_11) || (addr == MSG_EPB_1))) {
+      if (volkswagen_longitudinal && ((addr == MSG_MOTOR_2) || (addr == MSG_GRA_NEU) || (addr == MSG_MOTOR_2) || (addr == MSG_BREMSE_8) || (addr == MSG_BREMSE_11) || (addr == MSG_EPB_1) || (addr == MSG_AWV))) {
         // openpilot takes over signals OEM-radar listens to.
         bus_fwd = -1;
       } else {
