@@ -34,7 +34,6 @@ const LongitudinalLimits VOLKSWAGEN_PQ_LONG_LIMITS = {
 #define MSG_EPB_1               0x5C0   // TX by OP, EPB/ECD control
 #define MSG_BREMSE_8            0x1AC   // TX by OP, spoofing radar
 #define MSG_BREMSE_11           0x5B7   // TX by OP, spoofing radar
-#define MSG_BREMSE_11           0x5B7   // TX by OP, spoofing radar
 
 // Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
 const CanMsg VOLKSWAGEN_PQ_STOCK_TX_MSGS[] = {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8},
@@ -241,7 +240,7 @@ static int volkswagen_pq_fwd_hook(int bus_num, int addr) {
 
   switch (bus_num) {
     case 0:
-      if (volkswagen_longitudinal && ((addr == MSG_MOTOR_2) || (addr == MSG_GRA_NEU)) {
+      if (volkswagen_longitudinal && ((addr == MSG_MOTOR_2) || (addr == MSG_GRA_NEU) || (addr == MSG_MOTOR_2) || (addr == MSG_BREMSE_8) || (addr == MSG_BREMSE_11) || (addr == MSG_EPB_1)) {
         // openpilot takes over signals OEM-radar listens to
         bus_fwd = -1;
       } else {
