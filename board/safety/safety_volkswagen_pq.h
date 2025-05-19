@@ -33,9 +33,10 @@ const LongitudinalLimits VOLKSWAGEN_PQ_LONG_LIMITS = {
 #define MSG_EPB_1               0x5C0   // TX by OP, EPB/ECD control
 #define MSG_BREMSE_8            0x1AC   // TX by OP, spoofing radar
 #define MSG_BREMSE_11           0x5B7   // TX by OP, spoofing radar
+#define MSG_PLA_1               0x3D4   // TX by OP, experimentation signal only
 
 // Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-const CanMsg VOLKSWAGEN_PQ_STOCK_TX_MSGS[] = {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8},
+const CanMsg VOLKSWAGEN_PQ_STOCK_TX_MSGS[] = {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8}, {MSG_PLA_1, 1, 8},
                                               {MSG_GRA_NEU, 0, 4}, {MSG_GRA_NEU, 2, 4}, {MSG_ACC_GRA_ANZEIGE, 0, 8},
                                               {MSG_ACC_SYSTEM, 0, 8}, {MSG_MOTOR_2, 2, 8}, {MSG_EPB_1, 1, 8},
                                               {MSG_EPB_1, 2, 8}, {MSG_BREMSE_8, 2, 8}, {MSG_BREMSE_11, 2, 8}};
