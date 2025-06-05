@@ -7,13 +7,13 @@
 #define MSG_HCA_01      0x126   // TX by OP, ADAS Heading Control Assist steering torque
 #define MSG_LDW_02      0x397   // TX by OP, ADAS Lane line recognition and text alerts
 #define MSG_LH_EPS_03   0x09F   // RX from EPS, for driver steering torque
+#define MSG_PLA_01      0x130   // TX by OP, experimentation signal only
 
 // MLB only messages
 #define MSG_ESP_03      0x103   // RX from ABS, for wheel speeds
 #define MSG_LS_01       0x10B   // TX by OP, ACC control buttons for cancel/resume
 #define MSG_MOTOR_03    0x105   // RX from ECU, for driver throttle input and brake switch status
 #define MSG_TSK_02      0x10C   // RX from ECU, for ACC status from drivetrain coordinator
-#define MSG_PLA_1       0x130   // TX by OP, experimentation signal only
 
 // MQB only messages
 #define MSG_ACC_06      0x122   // TX by OP, ACC control instructions to the drivetrain coordinator

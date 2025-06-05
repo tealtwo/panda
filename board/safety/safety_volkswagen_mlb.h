@@ -13,7 +13,7 @@ const SteeringLimits VOLKSWAGEN_MLB_STEERING_LIMITS = {
 };
 
 // Transmit of LS_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-const CanMsg VOLKSWAGEN_MLB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8}, {MSG_LS_01, 0, 4}, {MSG_LS_01, 2, 4}, {MSG_LDW_02, 0, 8}, {MSG_PLA_1, 1, 8}};
+const CanMsg VOLKSWAGEN_MLB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8}, {MSG_LS_01, 0, 4}, {MSG_LS_01, 2, 4}, {MSG_LDW_02, 0, 8}, {MSG_PLA_01, 1, 8}};
 
 RxCheck volkswagen_mlb_rx_checks[] = {
   {.msg = {{MSG_ESP_03, 0, 8, .check_checksum = false, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
