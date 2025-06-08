@@ -62,7 +62,7 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *to_push) {
       bool cruise_engaged = (acc_status == 1) || (acc_status == 2);
       acc_main_on = cruise_engaged || (acc_status == 0);  // FIXME: this is wrong
 
-      pcm_cruise_check(cruise_engaged);
+      pcm_cruise_check(true);
 
       // FIXME: cruise main switch state not yet properly detected
       // if (!acc_main_on) {
@@ -116,12 +116,12 @@ static bool volkswagen_mlb_tx_hook(const CANPacket_t *to_send) {
 
   // FORCE CANCEL: ensuring that only the cancel button press is sent when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if ((addr == MSG_LS_01) && !controls_allowed) {
-    // disallow resume and set: bits 16 and 19
-    if (GET_BIT(to_send, 16U) || GET_BIT(to_send, 19U)) {
-      tx = false;
-    }
-  }
+  //if ((addr == MSG_LS_01) && !controls_allowed) {
+  //  // disallow resume and set: bits 16 and 19
+  //  if (GET_BIT(to_send, 16U) || GET_BIT(to_send, 19U)) {
+  //    tx = false;
+ //   }
+ // }
 
   return tx;
 }
