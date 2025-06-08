@@ -196,14 +196,10 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *to_send) {
     bool steer_req = ((hca_status == 5U) || (hca_status == 7U));
 
     // TODO: add in panda safety for this and limits
-    bool angle_control = (hca_status == 10U || hca_status == 11U || hca_status == 13U);
+    bool angle_control = (hca_status == 10U || hca_status == 11U || hca_status == 13U || hca_status == 15U);
 
-    if (steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_PQ_STEERING_LIMITS)) {
-      if (angle_control) {
-        tx = true;
-      } else {
-        tx = false;
-      }
+    if ((steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_PQ_STEERING_LIMITS) && !angle_control)) {
+      tx = false;
     }
   }
 
