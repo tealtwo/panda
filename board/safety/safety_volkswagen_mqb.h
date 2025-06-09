@@ -182,12 +182,12 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *to_push) {
 
     // Signal: Motor_14.MO_Fahrer_bremst (ECU detected brake pedal switch F63)
     if (addr == MSG_MOTOR_14) {
-      volkswagen_mqb_brake_pedal_switch = (GET_BYTE(to_push, 3) & 0x10U) >> 4;
+      volkswagen_mqb_brake_pedal_switch = false;
     }
 
     // Signal: ESP_05.ESP_Fahrer_bremst (ESP detected driver brake pressure above platform specified threshold)
     if (addr == MSG_ESP_05) {
-      volkswagen_mqb_brake_pressure_detected = (GET_BYTE(to_push, 3) & 0x4U) >> 2;
+      volkswagen_mqb_brake_pressure_detected = false;
     }
 
     brake_pressed = volkswagen_mqb_brake_pedal_switch || volkswagen_mqb_brake_pressure_detected;
