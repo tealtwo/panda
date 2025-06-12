@@ -12,6 +12,18 @@ const SteeringLimits VOLKSWAGEN_PQ_STEERING_LIMITS = {
   .type = TorqueDriverLimited,
 };
 
+const SteeringLimits VW_PQ_PLA_STEERING_LIMITS = {  // angle limits for angle control of EPS
+  .angle_deg_to_can = 22.85714286,    // CAN scaling factor of 0.04375. 1 / 0.04375 = 22.85714286
+  .angle_rate_up_lookup = {           // look into making more strict?
+    {0., 5., 25.},
+    {5.0, 2.0, 0.3}
+  },
+  .angle_rate_down_lookup = {
+    {0., 5., 25.},
+    {5.0, 2.0, 0.3}
+  },
+};
+
 // longitudinal limits
 // acceleration in m/s2 * 1000 to avoid floating point math
 const LongitudinalLimits VOLKSWAGEN_PQ_LONG_LIMITS = {
@@ -185,21 +197,30 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *to_send) {
   // Signal: HCA_1.LM_Offset (absolute torque)
   // Signal: HCA_1.LM_Offsign (direction)
   if (addr == MSG_HCA_1) {
-    int desired_torque = GET_BYTE(to_send, 2) | ((GET_BYTE(to_send, 3) & 0x7FU) << 8);
-    desired_torque = desired_torque / 32;  // DBC scale from PQ network to centi-Nm
-    int sign = (GET_BYTE(to_send, 3) & 0x80U) >> 7;
-    if (sign == 1) {
-      desired_torque *= -1;
-    }
-
     uint32_t hca_status = ((GET_BYTE(to_send, 1) >> 4) & 0xFU);
-    bool steer_req = ((hca_status == 5U) || (hca_status == 7U));
-
-    // TODO: add in panda safety for this and limits
     bool angle_control = (hca_status == 10U || hca_status == 11U || hca_status == 13U || hca_status == 15U);
+    if (!angle_control) {
+      int desired_torque = GET_BYTE(to_send, 2) | ((GET_BYTE(to_send, 3) & 0x7FU) << 8);
+      desired_torque = desired_torque / 32;  // DBC scale from PQ network to centi-Nm
+      int sign = (GET_BYTE(to_send, 3) & 0x80U) >> 7;
+      if (sign == 1) {
+        desired_torque *= -1;
+      }
 
-    if ((steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_PQ_STEERING_LIMITS) && !angle_control)) {
-      tx = false;
+      bool steer_req = ((hca_status == 5U) || (hca_status == 7U));
+
+      if ((steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_PQ_STEERING_LIMITS) && !angle_control)) {
+        tx = false;
+      }
+    } else {
+      int desired_angle = GET_BYTE(to_send, 2) | ((GET_BYTE(to_send, 3) & 0x7FU) << 8);
+      int sign = (GET_BYTE(to_send, 3) & 0x80U) >> 7;
+      if (sign == 1) {
+        desired_angle *= -1;
+      }
+      if (steer_angle_cmd_checks(desired_angle, angle_control, VW_PQ_PLA_STEERING_LIMITS)) {
+        tx = false;
+      }
     }
   }
 
