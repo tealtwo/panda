@@ -22,7 +22,7 @@ const LongitudinalLimits VOLKSWAGEN_MQB_LONG_LIMITS = {
 
 // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
 const CanMsg VOLKSWAGEN_MQB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8}, {MSG_GRA_ACC_01, 0, 8}, {MSG_GRA_ACC_01, 2, 8},
-                                               {MSG_LDW_02, 0, 8}, {MSG_LH_EPS_03, 2, 8}};
+                                               {MSG_LDW_02, 0, 8}, {MSG_LH_EPS_03, 2, 8}, {MSG_PLA_01, 1, 8}};
 const CanMsg VOLKSWAGEN_MQB_LONG_TX_MSGS[] = {{MSG_HCA_01, 0, 8}, {MSG_LDW_02, 0, 8}, {MSG_LH_EPS_03, 2, 8},
                                               {MSG_ACC_02, 0, 8}, {MSG_ACC_06, 0, 8}, {MSG_ACC_07, 0, 8}};
 
