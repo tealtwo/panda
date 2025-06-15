@@ -16,11 +16,11 @@ const SteeringLimits VW_PQ_PLA_STEERING_LIMITS = {  // angle limits for angle co
   .angle_deg_to_can = 22.85714286,    // CAN scaling factor of 0.04375. 1 / 0.04375 = 22.85714286
   .angle_rate_up_lookup = {           // look into making more strict?
     {0., 5., 25.},
-    {5.0, 2.0, 0.3}
+    {10., 1.6, .3}
   },
   .angle_rate_down_lookup = {
     {0., 5., 25.},
-    {5.0, 2.0, 0.3}
+    {10., 7.0, 0.8}
   },
 };
 
