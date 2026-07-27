@@ -127,11 +127,12 @@ void can_rx(uint8_t can_number);
 #define HARNESS_STATUS_FLIPPED 2U
 
 struct harness_t {
-  uint8_t status;
-  uint16_t sbu1_voltage_mV;
-  uint16_t sbu2_voltage_mV;
-  bool relay_driven;
-  bool sbu_adc_lock;
+  volatile uint8_t status;
+  volatile uint16_t sbu1_voltage_mV;
+  volatile uint16_t sbu2_voltage_mV;
+  volatile bool ignition_line;
+  volatile bool relay_driven;
+  volatile bool sbu_adc_lock;
 };
 extern struct harness_t harness;
 

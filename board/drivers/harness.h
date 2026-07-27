@@ -14,9 +14,6 @@ void set_intercept_relay(bool intercept, bool ignition_relay) {
     harness.relay_driven = true;
   }
 
-  // wait until we're not reading the analog voltages anymore
-  while (harness.sbu_adc_lock) {}
-
   if (harness.status == HARNESS_STATUS_NORMAL) {
     set_gpio_output(current_board->harness_config->GPIO_relay_SBU1, current_board->harness_config->pin_relay_SBU1, !ignition_relay);
     set_gpio_output(current_board->harness_config->GPIO_relay_SBU2, current_board->harness_config->pin_relay_SBU2, !drive_relay);
@@ -31,20 +28,21 @@ void set_intercept_relay(bool intercept, bool ignition_relay) {
 }
 
 bool harness_check_ignition(void) {
-  bool ret = false;
+  bool ret = harness.ignition_line;
 
-  // wait until we're not reading the analog voltages anymore
-  while (harness.sbu_adc_lock) {}
-
-  switch(harness.status){
-    case HARNESS_STATUS_NORMAL:
-      ret = !get_gpio_input(current_board->harness_config->GPIO_SBU1, current_board->harness_config->pin_SBU1);
-      break;
-    case HARNESS_STATUS_FLIPPED:
-      ret = !get_gpio_input(current_board->harness_config->GPIO_SBU2, current_board->harness_config->pin_SBU2);
-      break;
-    default:
-      break;
+  if (!harness.sbu_adc_lock) {
+    switch(harness.status){
+      case HARNESS_STATUS_NORMAL:
+        ret = !get_gpio_input(current_board->harness_config->GPIO_SBU1, current_board->harness_config->pin_SBU1);
+        break;
+      case HARNESS_STATUS_FLIPPED:
+        ret = !get_gpio_input(current_board->harness_config->GPIO_SBU2, current_board->harness_config->pin_SBU2);
+        break;
+      default:
+        ret = false;
+        break;
+    }
+    harness.ignition_line = ret;
   }
   return ret;
 }
@@ -81,6 +79,10 @@ static uint8_t harness_detect_orientation(void) {
     set_gpio_mode(current_board->harness_config->GPIO_SBU1, current_board->harness_config->pin_SBU1, MODE_INPUT);
     set_gpio_mode(current_board->harness_config->GPIO_SBU2, current_board->harness_config->pin_SBU2, MODE_INPUT);
     harness.sbu_adc_lock = false;
+
+    if (harness.relay_driven) {
+      ret = harness.status;
+    }
   }
   #endif
 

@@ -112,6 +112,17 @@ static void __attribute__ ((noinline)) enable_fpu(void) {
 #define HEARTBEAT_IGNITION_CNT_ON 5U
 #define HEARTBEAT_IGNITION_CNT_OFF 2U
 
+static volatile bool tick_sample_pending = false;
+
+static void tick_sample_poll(void) {
+  if (tick_sample_pending) {
+    tick_sample_pending = false;
+    harness_tick();
+    voltage_mV = current_board->read_voltage_mV();
+    current_mA = current_board->read_current_mA();
+  }
+}
+
 // called at 8Hz
 static void tick_handler(void) {
   static uint32_t siren_countdown = 0; // siren plays while countdown > 0
@@ -127,7 +138,7 @@ static void tick_handler(void) {
 
     // tick drivers at 8Hz
     fan_tick();
-    harness_tick();
+    tick_sample_pending = true;
     simple_watchdog_kick();
     sound_tick();
 
@@ -297,6 +308,8 @@ int main(void) {
   current_board->init();
   current_board->set_can_mode(CAN_MODE_NORMAL);
   harness_init();
+  voltage_mV = current_board->read_voltage_mV();
+  current_mA = current_board->read_current_mA();
 
   // panda has an FPU, let's use it!
   enable_fpu();
@@ -346,6 +359,7 @@ int main(void) {
       enter_stop_mode();
     }
     #endif
+    tick_sample_poll();
     if (!power_save_enabled) {
       #ifdef DEBUG_FAULTS
       if (fault_status == FAULT_STATUS_NONE) {
@@ -356,6 +370,7 @@ int main(void) {
           delay(fade >> 4);
           led_set(LED_RED, false);
           delay((MAX_LED_FADE - fade) >> 4);
+          tick_sample_poll();
         }
 
         for (uint32_t fade = MAX_LED_FADE; fade > 0U; fade -= 1U) {
@@ -363,6 +378,7 @@ int main(void) {
           delay(fade >> 4);
           led_set(LED_RED, false);
           delay((MAX_LED_FADE - fade) >> 4);
+          tick_sample_poll();
         }
 
       #ifdef DEBUG_FAULTS
